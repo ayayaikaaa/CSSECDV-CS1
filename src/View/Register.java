@@ -9,6 +9,12 @@ public class Register extends javax.swing.JPanel {
         initComponents();
     }
 
+    public void clearRegisterFields() {
+        usernameFld.setText(null);
+        passwordFld.setText(null);
+        confpassFld.setText(null);
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -97,11 +103,13 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        clearRegisterFields();
         frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        clearRegisterFields();
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 

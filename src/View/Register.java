@@ -1,9 +1,25 @@
 
 package View;
 
-public class Register extends javax.swing.JPanel {
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
+public class Register extends javax.swing.JPanel {
     public Frame frame;
+    
+    // Password Encryption-Decryption vars
+    private SecretKey key;
+    private int KEY_SIZE = 128;
+    private int T_LEN = 128;
+    private Cipher encryptionCipher;
     
     public Register() {
         initComponents();
@@ -97,10 +113,50 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
-        frame.loginNav();
+        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        //frame.loginNav();
+        
+        try {
+            // Use AES cipher
+            KeyGenerator generator = KeyGenerator.getInstance("AES");
+            generator.init(KEY_SIZE);
+            key = generator.generateKey();
+            
+            String encryptedPassword = encrypt(passwordFld.getText());
+            
+            frame.registerAction(usernameFld.getText(), encryptedPassword, confpassFld.getText());
+            frame.loginNav();
+            
+            // Decrypt password
+            //String decryptedPassword = decrypt(encryptedPassword);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_registerBtnActionPerformed
 
+    private String encrypt(String message) throws Exception {
+        byte[] messageBytes = message.getBytes() ;
+        encryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encryptedBytes = encryptionCipher.doFinal(messageBytes);
+        return encode(encryptedBytes);
+    }
+    
+    private String decrypt(String encryptedMessage) throws Exception {
+        byte[] messageBytes = decode(encryptedMessage);
+        Cipher decryptionCipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(T_LEN, encryptionCipher.getIV());
+        decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
+        byte[] decryptedBytes = decryptionCipher.doFinal(messageBytes);
+        return new String(decryptedBytes);
+    }
+    
+    private String encode(byte[] data) { return Base64.getEncoder().encodeToString(data); }
+    
+    private byte[] decode(String data) { return Base64.getDecoder().decode(data); }
+    
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed

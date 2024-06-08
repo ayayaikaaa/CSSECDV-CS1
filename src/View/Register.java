@@ -1,10 +1,6 @@
 
 package View;
 
-import util.Encryption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class Register extends javax.swing.JPanel {
     public Frame frame;
     
@@ -100,19 +96,8 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
-        //frame.loginNav();
-        try {
-            Encryption encryption = new Encryption();
-            String encryptedPassword;
-            encryptedPassword = encryption.encrypt_password(passwordFld.getText());
-            
-            // TODOs: Currently no pass and confirmPass checker
-            frame.registerAction(usernameFld.getText(), encryptedPassword, confpassFld.getText());
-            frame.loginNav();
-        } catch (Exception ex) {
-            Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed

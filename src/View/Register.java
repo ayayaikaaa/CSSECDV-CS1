@@ -1,11 +1,16 @@
-
 package View;
+
+import javax.swing.*;
 
 public class Register extends javax.swing.JPanel {
     public Frame frame;
     
     public Register() {
         initComponents();
+    }
+    
+    public boolean isPassSame(){
+        return passwordFld.getText().equals(confpassFld.getText());
     }
 
     public void clearRegisterFields() {
@@ -102,9 +107,13 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
-        clearRegisterFields();
-        frame.loginNav();
+        if(isPassSame()){
+            frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+            clearRegisterFields();
+            frame.loginNav();
+        } else {
+            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed

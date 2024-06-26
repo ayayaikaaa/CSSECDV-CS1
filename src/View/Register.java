@@ -2,7 +2,6 @@
 package View;
 
 public class Register extends javax.swing.JPanel {
-
     public Frame frame;
     
     public Register() {

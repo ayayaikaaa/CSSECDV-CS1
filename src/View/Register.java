@@ -1,5 +1,6 @@
 package View;
 
+
 import Controller.SQLite;
 
 import javax.swing.*;
@@ -18,7 +19,17 @@ public class Register extends javax.swing.JPanel {
     public Register() {
         initComponents();
     }
+    
+    public boolean isPassSame(){
+        return passwordFld.getText().equals(confpassFld.getText());
+    }
 
+    public void clearRegisterFields() {
+        usernameFld.setText(null);
+        passwordFld.setText(null);
+        confpassFld.setText(null);
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -26,10 +37,10 @@ public class Register extends javax.swing.JPanel {
         sqlite = new SQLite();
 
         registerBtn = new javax.swing.JButton();
-        passwordFld = new javax.swing.JTextField();
+        passwordFld = new javax.swing.JPasswordField();
         usernameFld = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        confpassFld = new javax.swing.JTextField();
+        confpassFld = new javax.swing.JPasswordField();
         backBtn = new javax.swing.JButton();
         passwordLabel = new javax.swing.JLabel();
         usernameLabel = new javax.swing.JLabel();
@@ -299,7 +310,6 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-
         if(sqlite.findUser(usernameFld.getText().toLowerCase()) == false) {
             frame.registerAction(usernameFld.getText().toLowerCase(), passwordFld.getText(), confpassFld.getText());
             frame.loginNav();
@@ -313,6 +323,7 @@ public class Register extends javax.swing.JPanel {
     }//GEN-LAST:event_registerBtnActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        clearRegisterFields();
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 

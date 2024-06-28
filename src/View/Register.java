@@ -1,10 +1,23 @@
 package View;
 
+
+import Controller.SQLite;
+
 import javax.swing.*;
 import java.awt.*;
+import Utility.Encryption;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import Model.User;
+
 
 public class Register extends javax.swing.JPanel {
+
+    static int strength = 0;
+    static boolean usernameValid = false;
     public Frame frame;
+    private Encryption encryption = new Encryption();
+    public SQLite sqlite;
     
     public Register() {
         initComponents();
@@ -17,7 +30,7 @@ public class Register extends javax.swing.JPanel {
     }
     
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents                          
     private void initComponents() {
 
         registerBtn = new javax.swing.JButton();
@@ -152,6 +165,20 @@ public class Register extends javax.swing.JPanel {
             clearRegisterFields();
             passwordLabel.setText("");
             confpassLabel.setText("");
+
+//        if(isPassSame()){
+//            try {
+//                System.out.println("Password:");
+//                String encryptedPass = encrypt(passwordFld.getText());
+//                System.out.println(encryptedPass);
+//                System.out.println(decrypt(encryptedPass));
+
+//                frame.registerAction(usernameFld.getText(), encrypt(passwordFld.getText()), encrypt(confpassFld.getText()));
+//                clearRegisterFields();
+//                frame.loginNav();
+//            } catch (Exception e) { Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e); }
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_registerBtnActionPerformed
 
@@ -332,6 +359,14 @@ public class Register extends javax.swing.JPanel {
         return confpassFld.getText().equals(passwordFld.getText());
     }
     
+    private String encrypt(String message) throws Exception {
+        return encryption.encryptPassword(message);
+    }
+    
+    private String decrypt(String message) throws Exception {
+        return encryption.decryptPassword(message);
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
     private javax.swing.JTextField confpassFld;

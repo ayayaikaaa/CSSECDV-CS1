@@ -61,5 +61,4 @@ public class Encryption {
     private String encode(byte[] encryptedBytes) { return Base64.getEncoder().encodeToString(encryptedBytes); }
     
     private byte[] decode(String encryptedPassword) { return Base64.getDecoder().decode(encryptedPassword); }
-    
 }

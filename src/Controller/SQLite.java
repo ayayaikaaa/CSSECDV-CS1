@@ -9,6 +9,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 public class SQLite {
@@ -301,6 +302,20 @@ public class SQLite {
         } catch (Exception ex) {
             System.out.print(ex);
         }
+    }
+    
+    public boolean findUser(String username){
+        String sql = "SELECT COUNT(*) as count FROM users WHERE username= ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.getInt("Count") > 0) return true;
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return false;
     }
     
     public Product getProduct(String name){

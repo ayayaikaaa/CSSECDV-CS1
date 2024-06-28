@@ -1,23 +1,13 @@
 package View;
 
-
-import Controller.SQLite;
-
 import javax.swing.*;
 import java.awt.*;
 import Utility.Encryption;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import Model.User;
-
 
 public class Register extends javax.swing.JPanel {
 
-    static int strength = 0;
-    static boolean usernameValid = false;
     public Frame frame;
-    private Encryption encryption = new Encryption();
-    public SQLite sqlite;
+    public Encryption encryption = new Encryption();
     
     public Register() {
         initComponents();
@@ -30,7 +20,7 @@ public class Register extends javax.swing.JPanel {
     }
     
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents                          
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">                                                    
     private void initComponents() {
 
         registerBtn = new javax.swing.JButton();
@@ -149,11 +139,18 @@ public class Register extends javax.swing.JPanel {
                 .addComponent(registerBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(70, Short.MAX_VALUE))
         );
-    }// </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>                        
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
+        String encryptedPass = "", encryptedConfPass = "";
+        
+        try {
+            encryptedPass = encryptPassword(passwordFld.getText());
+            encryptedConfPass = encryptPassword(confpassFld.getText());
+        } catch (Exception e) {}
+        
         if(!frame.main.sqlite.findUser(usernameFld.getText())){
-            //frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+            frame.registerAction(usernameFld.getText(), encryptedPass, encryptedConfPass);
             JOptionPane.showMessageDialog(this, "Registration Successful", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearRegisterFields();
             passwordLabel.setText("");
@@ -165,20 +162,6 @@ public class Register extends javax.swing.JPanel {
             clearRegisterFields();
             passwordLabel.setText("");
             confpassLabel.setText("");
-
-//        if(isPassSame()){
-//            try {
-//                System.out.println("Password:");
-//                String encryptedPass = encrypt(passwordFld.getText());
-//                System.out.println(encryptedPass);
-//                System.out.println(decrypt(encryptedPass));
-
-//                frame.registerAction(usernameFld.getText(), encrypt(passwordFld.getText()), encrypt(confpassFld.getText()));
-//                clearRegisterFields();
-//                frame.loginNav();
-//            } catch (Exception e) { Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e); }
-//        } else {
-//            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_registerBtnActionPerformed
 
@@ -191,38 +174,71 @@ public class Register extends javax.swing.JPanel {
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void passwordFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFldKeyReleased
-        if(!passwordFld.getText().equals("")) checkPassStrength();
-        else passwordLabel.setText("");
-        
-        if (isPassSame()) {
-            if (isUsernameValid()){
-                confpassLabel.setText("Passwords MATCH");
-                confpassLabel.setForeground(Color.GREEN);
-                registerBtn.setEnabled(true);
+        if(!passwordFld.getText().equals("")) {
+            checkPassStrength();
+            if (!confpassFld.getText().equals("")) {
+                if (isPassSame()){
+                    if (isUsernameValid()){
+                            if(checkPassStrength() != 5) {
+                                confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
+                                confpassLabel.setForeground(Color.RED);
+                                registerBtn.setEnabled(false);
+                            } else {
+                                confpassLabel.setText("Passwords MATCH");
+                                confpassLabel.setForeground(Color.GREEN);
+                                registerBtn.setEnabled(true);
+                            }
+                    } else {
+                        if (usernameFld.getText().equals("")){
+                            confpassLabel.setText("Passwords MATCH but username is EMPTY");
+                            confpassLabel.setForeground(Color.RED);
+                        } else {
+                            confpassLabel.setText("Passwords MATCH but username is INVALID");
+                            confpassLabel.setForeground(Color.RED);
+                        }
+                        registerBtn.setEnabled(false);
+                    }
+                } else {
+                    confpassLabel.setText("Passwords DO NOT MATCH");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
+                }
             } else {
-                confpassLabel.setText("Passwords MATCH but username is INVALID");
-                confpassLabel.setForeground(Color.RED);
+                confpassLabel.setText("");
                 registerBtn.setEnabled(false);
             }
         } else {
-            confpassLabel.setText("Passwords DO NOT MATCH");
-            confpassLabel.setForeground(Color.RED);
+            passwordLabel.setText("");
+            confpassLabel.setText("");
             registerBtn.setEnabled(false);
         }
     }//GEN-LAST:event_passwordFldKeyReleased
 
     private void confpassFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_confpassFldKeyReleased
-        if(confpassFld.getText().equals("")){
-            confpassLabel.setText("");
-        } else if (isPassSame() && isUsernameValid()){
-            confpassLabel.setText("Passwords MATCH");
-            confpassLabel.setForeground(Color.GREEN);
-            registerBtn.setEnabled(true);
-        } else if (isPassSame() && !isUsernameValid()){
-            confpassLabel.setText("Passwords MATCH but username is INVALID");
-            confpassLabel.setForeground(Color.RED);
-            registerBtn.setEnabled(false);
-        }  else{
+        if(confpassFld.getText().equals("")) confpassLabel.setText("");
+        else if (isPassSame()){
+            if (isUsernameValid()){
+                if(checkPassStrength() != 5) {
+                    confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
+                } else {
+                    confpassLabel.setText("Passwords MATCH");
+                    confpassLabel.setForeground(Color.GREEN);
+                    registerBtn.setEnabled(true);
+                }
+            } else {
+                if(usernameFld.getText().equals("")) {
+                    usernameLabel.setText("");
+                    confpassLabel.setText("Passwords MATCH but username is EMPTY");
+                    confpassLabel.setForeground(Color.RED);
+                } else {
+                    confpassLabel.setText("Passwords MATCH but username is INVALID");
+                    confpassLabel.setForeground(Color.RED);
+                }
+                registerBtn.setEnabled(false);
+            }
+        } else{
             confpassLabel.setText("Passwords DO NOT MATCH");
             confpassLabel.setForeground(Color.RED);
             registerBtn.setEnabled(false);
@@ -230,14 +246,24 @@ public class Register extends javax.swing.JPanel {
     }//GEN-LAST:event_confpassFldKeyReleased
 
     private void usernameFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_usernameFldKeyReleased
-        if(!usernameFld.getText().equals("")) isUsernameValid();
-        else usernameLabel.setText("");
-        
-        if (isUsernameValid()) {
+        if (usernameFld.getText().equals("")){
+            usernameLabel.setText("");
             if (!passwordFld.getText().equals("") && isPassSame()){
-                confpassLabel.setText("Passwords MATCH");
-                confpassLabel.setForeground(Color.GREEN);
-                registerBtn.setEnabled(true);
+                confpassLabel.setText("Passwords MATCH but username is EMPTY");
+                confpassLabel.setForeground(Color.RED);
+                registerBtn.setEnabled(false);
+            }
+        } else if (isUsernameValid()) {
+            if (!passwordFld.getText().equals("") && isPassSame()){
+                if(checkPassStrength() != 5) {
+                    confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
+                } else {
+                    confpassLabel.setText("Passwords MATCH");
+                    confpassLabel.setForeground(Color.GREEN);
+                    registerBtn.setEnabled(true);
+                }
             }
         } else {
             if (!passwordFld.getText().equals("") && isPassSame()){
@@ -334,7 +360,7 @@ public class Register extends javax.swing.JPanel {
         return strength;
     }
     
-    public void checkPassStrength(){
+    public int checkPassStrength(){
         int currentStrength = getPassStrength(passwordFld.getText());
         
         if(currentStrength <= 0){
@@ -352,19 +378,17 @@ public class Register extends javax.swing.JPanel {
         } else if(currentStrength == 5){
             passwordLabel.setText(passwordLabel.getText() + "Current Password Strength: STRONG</html>");
             passwordLabel.setForeground(Color.GREEN);
-        }       
+        }
+        
+        return currentStrength;
     }
     
     public boolean isPassSame(){
         return confpassFld.getText().equals(passwordFld.getText());
     }
     
-    private String encrypt(String message) throws Exception {
-        return encryption.encryptPassword(message);
-    }
-    
-    private String decrypt(String message) throws Exception {
-        return encryption.decryptPassword(message);
+    private String encryptPassword(String password) throws Exception {
+        return encryption.encryptPassword(password);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

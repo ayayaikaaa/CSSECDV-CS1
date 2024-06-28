@@ -4,6 +4,9 @@ package View;
 import Controller.SQLite;
 
 import javax.swing.*;
+import Utility.Encryption;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,6 +17,7 @@ public class Register extends javax.swing.JPanel {
     static int strength = 0;
     static boolean usernameValid = false;
     public Frame frame;
+    private Encryption encryption = new Encryption();
     public SQLite sqlite;
     
     public Register() {
@@ -310,6 +314,20 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
+//        if(isPassSame()){
+//            try {
+//                System.out.println("Password:");
+//                String encryptedPass = encrypt(passwordFld.getText());
+//                System.out.println(encryptedPass);
+//                System.out.println(decrypt(encryptedPass));
+
+//                frame.registerAction(usernameFld.getText(), encrypt(passwordFld.getText()), encrypt(confpassFld.getText()));
+//                clearRegisterFields();
+//                frame.loginNav();
+//            } catch (Exception e) { Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e); }
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
+
         if(sqlite.findUser(usernameFld.getText().toLowerCase()) == false) {
             frame.registerAction(usernameFld.getText().toLowerCase(), passwordFld.getText(), confpassFld.getText());
             frame.loginNav();
@@ -326,6 +344,15 @@ public class Register extends javax.swing.JPanel {
         clearRegisterFields();
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
+
+
+    private String encrypt(String message) throws Exception {
+        return encryption.encryptPassword(message);
+    }
+    
+    private String decrypt(String message) throws Exception {
+        return encryption.decryptPassword(message);
+    }
 
     public int checkLength(String password){
         if(password.length() < 12){
@@ -391,7 +418,6 @@ public class Register extends javax.swing.JPanel {
         }
         return true;
     }
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;

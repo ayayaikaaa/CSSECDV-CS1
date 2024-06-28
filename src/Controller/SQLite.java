@@ -4,11 +4,8 @@ import Model.History;
 import Model.Logs;
 import Model.Product;
 import Model.User;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 
 public class SQLite {
@@ -316,5 +313,19 @@ public class SQLite {
             System.out.print(ex);
         }
         return product;
+    }
+
+    public boolean findUser(String name){
+        String sql = "SELECT COUNT(*) as count FROM users WHERE username='" + name + "';";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                ResultSet rs = pstmt.executeQuery();
+                if(rs.getInt("Count") > 0){
+                    return true;
+                }
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return false;
     }
 }

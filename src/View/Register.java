@@ -1,9 +1,13 @@
 package View;
 
 import javax.swing.*;
+import Utility.Encryption;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Register extends javax.swing.JPanel {
     public Frame frame;
+    private Encryption encryption = new Encryption();
     
     public Register() {
         initComponents();
@@ -108,9 +112,16 @@ public class Register extends javax.swing.JPanel {
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
         if(isPassSame()){
-            frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
-            clearRegisterFields();
-            frame.loginNav();
+            try {
+                System.out.println("Password:");
+                String encryptedPass = encrypt(passwordFld.getText());
+                System.out.println(encryptedPass);
+                System.out.println(decrypt(encryptedPass));
+
+                frame.registerAction(usernameFld.getText(), encrypt(passwordFld.getText()), encrypt(confpassFld.getText()));
+                clearRegisterFields();
+                frame.loginNav();
+            } catch (Exception e) { Logger.getLogger(Register.class.getName()).log(Level.SEVERE, null, e); }
         } else {
             JOptionPane.showMessageDialog(this, "Passwords do not match.", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -121,6 +132,13 @@ public class Register extends javax.swing.JPanel {
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 
+    private String encrypt(String message) throws Exception {
+        return encryption.encryptPassword(message);
+    }
+    
+    private String decrypt(String message) throws Exception {
+        return encryption.decryptPassword(message);
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;

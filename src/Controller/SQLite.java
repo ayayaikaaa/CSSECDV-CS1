@@ -4,6 +4,7 @@ import Model.History;
 import Model.Logs;
 import Model.Product;
 import Model.User;
+import Utility.Encryption;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -16,6 +17,7 @@ public class SQLite {
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
+    public Encryption encryption;
     
     public void createNewDatabase() {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
@@ -181,7 +183,12 @@ public class SQLite {
     }
     
     public void addUser(String username, String password) {
-        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";
+        encryption = new Encryption();
+        String sql = "";
+        try {
+            String encryptedPass = encryption.encryptPassword(password);
+            sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + encryptedPass + "')";
+        } catch (Exception e) {}
         
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()){
@@ -281,7 +288,12 @@ public class SQLite {
     }
     
     public void addUser(String username, String password, int role) {
-        String sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + password + "','" + role + "')";
+        encryption = new Encryption();
+        String sql = "";
+        try {
+            String encryptedPass = encryption.encryptPassword(password);
+            sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + encryptedPass + "','" + role + "')";
+        } catch (Exception e) {}
         
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()){

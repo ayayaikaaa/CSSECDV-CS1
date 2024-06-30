@@ -2,6 +2,7 @@ package Controller;
 
 
 import Model.History;
+import Model.Keys;
 import Model.Logs;
 import Model.Product;
 import Model.User;
@@ -32,12 +33,14 @@ public class Main {
         sqlite.dropLogsTable();
         sqlite.dropProductTable();
         sqlite.dropUserTable();
+        sqlite.dropKeysTable();
         
         // Create users table if not exist
         sqlite.createHistoryTable();
         sqlite.createLogsTable();
         sqlite.createProductTable();
         sqlite.createUserTable();
+        sqlite.createKeysTable();
         
         // Add sample history
         sqlite.addHistory("admin", "Antivirus", 1, "2019-04-03 14:30:00.000");
@@ -57,39 +60,40 @@ public class Main {
         // Add sample users
         sqlite.addUser("admin", "qwerty1234" , 5);
         sqlite.addUser("manager", "qwerty1234", 4);
-        sqlite.addUser("staff", "qwerty1234", 3);
-        sqlite.addUser("client1", "qwerty1234", 2);
-        sqlite.addUser("client2", "qwerty1234", 2);
+//        sqlite.addUser("staff", "qwerty1234", 3);
+//        sqlite.addUser("client1", "qwerty1234", 2);
+//        sqlite.addUser("client2", "qwerty1234", 2);
         
         
-        // Get users
-        ArrayList<History> histories = sqlite.getHistory();
-        for(int nCtr = 0; nCtr < histories.size(); nCtr++){
-            System.out.println("===== History " + histories.get(nCtr).getId() + " =====");
-            System.out.println(" Username: " + histories.get(nCtr).getUsername());
-            System.out.println(" Name: " + histories.get(nCtr).getName());
-            System.out.println(" Stock: " + histories.get(nCtr).getStock());
-            System.out.println(" Timestamp: " + histories.get(nCtr).getTimestamp());
-        }
-        
-        // Get users
-        ArrayList<Logs> logs = sqlite.getLogs();
-        for(int nCtr = 0; nCtr < logs.size(); nCtr++){
-            System.out.println("===== Logs " + logs.get(nCtr).getId() + " =====");
-            System.out.println(" Username: " + logs.get(nCtr).getEvent());
-            System.out.println(" Password: " + logs.get(nCtr).getUsername());
-            System.out.println(" Role: " + logs.get(nCtr).getDesc());
-            System.out.println(" Timestamp: " + logs.get(nCtr).getTimestamp());
-        }
-        
-        // Get users
-        ArrayList<Product> products = sqlite.getProduct();
-        for(int nCtr = 0; nCtr < products.size(); nCtr++){
-            System.out.println("===== Product " + products.get(nCtr).getId() + " =====");
-            System.out.println(" Name: " + products.get(nCtr).getName());
-            System.out.println(" Stock: " + products.get(nCtr).getStock());
-            System.out.println(" Price: " + products.get(nCtr).getPrice());
-        }
+//        // Get histories
+//        ArrayList<History> histories = sqlite.getHistory();
+//        for(int nCtr = 0; nCtr < histories.size(); nCtr++){
+//            System.out.println("===== History " + histories.get(nCtr).getId() + " =====");
+//            System.out.println(" Username: " + histories.get(nCtr).getUsername());
+//            System.out.println(" Name: " + histories.get(nCtr).getName());
+//            System.out.println(" Stock: " + histories.get(nCtr).getStock());
+//            System.out.println(" Timestamp: " + histories.get(nCtr).getTimestamp());
+//        }
+//        
+//        // Get logs
+//        ArrayList<Logs> logs = sqlite.getLogs();
+//        for(int nCtr = 0; nCtr < logs.size(); nCtr++){
+//            System.out.println("===== Logs " + logs.get(nCtr).getId() + " =====");
+//            System.out.println(" Username: " + logs.get(nCtr).getEvent());
+//            System.out.println(" Password: " + logs.get(nCtr).getUsername());
+//            System.out.println(" Role: " + logs.get(nCtr).getDesc());
+//            System.out.println(" Timestamp: " + logs.get(nCtr).getTimestamp());
+//        }
+//        
+//        // Get products
+//        ArrayList<Product> products = sqlite.getProduct();
+//        for(int nCtr = 0; nCtr < products.size(); nCtr++){
+//            System.out.println("===== Product " + products.get(nCtr).getId() + " =====");
+//            System.out.println(" Name: " + products.get(nCtr).getName());
+//            System.out.println(" Stock: " + products.get(nCtr).getStock());
+//            System.out.println(" Price: " + products.get(nCtr).getPrice());
+//        }
+
         // Get users
         ArrayList<User> users = sqlite.getUsers();
         for(int nCtr = 0; nCtr < users.size(); nCtr++){
@@ -99,6 +103,46 @@ public class Main {
             System.out.println(" Role: " + users.get(nCtr).getRole());
             System.out.println(" Locked: " + users.get(nCtr).getLocked());
         }
+        
+        // Get keys
+        /**
+         * TODO FIX: Bug on the KEYS TABLE Primary Key AUTOINCREMENT.
+         * - always at 0.
+         */
+        ArrayList<Keys> keys = sqlite.getKeys();
+        for(int nCtr = 0; nCtr < keys.size(); nCtr++){
+            System.out.println("===== Keys " + (nCtr + 1) + " =====");
+            System.out.println(" Key: " + keys.get(nCtr).getKey());
+            System.out.println(" IV: " + keys.get(nCtr).getIv());
+        }
+
+//        // Debug Decryption
+//        try {
+//            //ArrayList<User> users = sqlite.getUsers();
+//            User user = users.get(0);
+//            String username = user.getUsername();
+//            String password = user.getPassword();
+//            System.out.println("==== Debugging ====");
+//            System.out.println(" Username: " + username);
+//            System.out.println(" Password: " + password);
+//            
+//            String sKey, sIv;
+//            try (Scanner scanIn = new Scanner(System.in)) {
+//                System.out.print(" Enter Key: ");
+//                sKey = scanIn.nextLine();
+//                System.out.print(" Enter IV: ");
+//                sIv = scanIn.nextLine();
+//            }
+//            EncryptionTool encrypt = new EncryptionTool();
+//            encrypt.setKey(sKey);
+//            encrypt.setIv(sIv);
+//            
+//            System.out.println(" Decoded Password: " + encrypt.decryptMessage(password));
+//            System.out.println("END");
+//        } catch (Exception e) {
+//            System.out.println(e);
+//            System.exit(1);
+//        }
         
         // Initialize User Interface
         Frame frame = new Frame();

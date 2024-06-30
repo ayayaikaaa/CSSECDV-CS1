@@ -2,12 +2,10 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
-import Utility.Encryption;
 
 public class Register extends javax.swing.JPanel {
 
     public Frame frame;
-    public Encryption encryption = new Encryption();
     
     public Register() {
         initComponents();
@@ -142,15 +140,8 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        String encryptedPass = "", encryptedConfPass = "";
-        
-        try {
-            encryptedPass = encryptPassword(passwordFld.getText());
-            encryptedConfPass = encryptPassword(confpassFld.getText());
-        } catch (Exception e) {}
-        
         if(!frame.main.sqlite.findUser(usernameFld.getText())){
-            frame.registerAction(usernameFld.getText(), encryptedPass, encryptedConfPass);
+            frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
             JOptionPane.showMessageDialog(this, "Registration Successful", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearRegisterFields();
             passwordLabel.setText("");
@@ -385,10 +376,6 @@ public class Register extends javax.swing.JPanel {
     
     public boolean isPassSame(){
         return confpassFld.getText().equals(passwordFld.getText());
-    }
-    
-    private String encryptPassword(String password) throws Exception {
-        return encryption.encryptPassword(password);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

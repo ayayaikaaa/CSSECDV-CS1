@@ -1,9 +1,11 @@
 package Controller;
 
 import Model.History;
+import Model.Keys;
 import Model.Logs;
 import Model.Product;
 import Model.User;
+import Utility.EncryptionTool;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -16,6 +18,7 @@ public class SQLite {
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
+    public EncryptionTool encryption;
     
     public void createNewDatabase() {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
@@ -99,6 +102,22 @@ public class SQLite {
         }
     }
     
+    public void createKeysTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS keys (\n"
+            + " userId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+            + " key TEXT NOT NULL, \n"
+            + " iv TEXT NOT NULL \n"
+            + ");";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table keys in database.db created.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
     public void dropHistoryTable() {
         String sql = "DROP TABLE IF EXISTS history;";
 
@@ -147,6 +166,18 @@ public class SQLite {
         }
     }
     
+    public void dropKeysTable() {
+        String sql = "DROP TABLE IF EXISTS keys;";
+        
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table keys in database.db dropped.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
     public void addHistory(String username, String name, int stock, String timestamp) {
         String sql = "INSERT INTO history(username,name,stock,timestamp) VALUES('" + username + "','" + name + "','" + stock + "','" + timestamp + "')";
         
@@ -181,7 +212,18 @@ public class SQLite {
     }
     
     public void addUser(String username, String password) {
-        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";
+        String sql = "";
+        try {
+            encryption = new EncryptionTool();
+            String encryptedPass = encryption.encryptMessage(password);
+            sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + encryptedPass + "')";
+            String key = encryption.getKeyString();
+            String iv = encryption.getIvString();
+            SQLite sqlite = new SQLite();
+            sqlite.addKeys(key, iv);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
         
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()){
@@ -193,6 +235,40 @@ public class SQLite {
 //      pstmt.setString(1, username);
 //      pstmt.setString(2, password);
 //      pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void addUser(String username, String password, int role) {
+        String sql = "";
+        try {
+            encryption = new EncryptionTool();
+            String encryptedPass = encryption.encryptMessage(password);
+            sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + encryptedPass + "','" + role + "')";
+            String key = encryption.getKeyString();
+            String iv = encryption.getIvString();
+            SQLite sqlite = new SQLite();
+            sqlite.addKeys(key, iv);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()){
+            stmt.execute(sql);
+            
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void addKeys(String key, String iv) {
+        String sql = "INSERT INTO keys(key, iv) VALUES('" + key + "','" + iv + "')";
+        
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()){
+            stmt.execute(sql);
         } catch (Exception ex) {
             System.out.print(ex);
         }
@@ -280,16 +356,37 @@ public class SQLite {
         return users;
     }
     
-    public void addUser(String username, String password, int role) {
-        String sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + password + "','" + role + "')";
+    public ArrayList<Keys> getKeys(){
+        String sql = "SELECT userId, key, iv FROM keys";
+        ArrayList<Keys> keys = new ArrayList<Keys>();
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
             
+            while (rs.next()) {
+                keys.add(new Keys(rs.getString("key"),
+                                  rs.getString("iv")));
+            }
         } catch (Exception ex) {
             System.out.print(ex);
         }
+        return keys;
+    }
+    
+    public Product getProduct(String name){
+        String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";
+        Product product = null;
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)){
+            product = new Product(rs.getString("name"),
+                                   rs.getInt("stock"),
+                                   rs.getFloat("price"));
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return product;
     }
     
     public void removeUser(String username) {
@@ -299,6 +396,18 @@ public class SQLite {
             Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
             System.out.println("User " + username + " has been deleted.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void removeKeys(int userId) {
+        String sql = "DELETE FROM keys WHERE userId='" + userId + "';";
+        
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Keys " + userId + " has been deleted.");
         } catch (Exception ex) {
             System.out.print(ex);
         }
@@ -318,19 +427,17 @@ public class SQLite {
         return false;
     }
     
-    public Product getProduct(String name){
-        String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";
-        Product product = null;
+    public boolean findKeys(int userId){
+        String sql = "SELECT COUNT(*) as count FROM keys WHERE userId= ?";
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)){
-            product = new Product(rs.getString("name"),
-                                   rs.getInt("stock"),
-                                   rs.getFloat("price"));
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.getInt("Count") > 0) return true;
         } catch (Exception ex) {
             System.out.print(ex);
         }
-        return product;
+        return false;
     }
-  
 }

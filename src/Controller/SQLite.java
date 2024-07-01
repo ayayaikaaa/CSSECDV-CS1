@@ -12,6 +12,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class SQLite {
@@ -104,9 +105,11 @@ public class SQLite {
     
     public void createKeysTable() {
         String sql = "CREATE TABLE IF NOT EXISTS keys (\n"
-            + " userId INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-            + " key TEXT NOT NULL, \n"
-            + " iv TEXT NOT NULL \n"
+            + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+            + " userId INTEGER NOT NULL,\n"
+            + " key TEXT NOT NULL,\n"
+            + " iv TEXT NOT NULL,\n"
+            + " FOREIGN KEY (userId) REFERENCES users(id)\n"
             + ");";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -212,63 +215,96 @@ public class SQLite {
     }
     
     public void addUser(String username, String password) {
-        String sql = "";
+        String sql = "INSERT INTO users(username,password) VALUES(?, ?)";
+        String encryptedPass = "";
+        int userId = -1;
+        String key = "";
+        String iv = "";
         try {
             encryption = new EncryptionTool();
-            String encryptedPass = encryption.encryptMessage(password);
-            sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + encryptedPass + "')";
-            String key = encryption.getKeyString();
-            String iv = encryption.getIvString();
-            SQLite sqlite = new SQLite();
-            sqlite.addKeys(key, iv);
+            encryptedPass = encryption.encryptMessage(password);
+            key = encryption.getKeyString();
+            iv = encryption.getIvString();
         } catch (Exception ex) {
             System.out.print(ex);
         }
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
-            
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            // Error Handling
+            if(encryptedPass.isEmpty() && key.isEmpty() && iv.isEmpty()) {
+                throw new SQLException("User creation failed.");
+            } 
 //      PREPARED STATEMENT EXAMPLE
-//      String sql = "INSERT INTO users(username,password) VALUES(?,?)";
-//      PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//      pstmt.setString(1, username);
-//      pstmt.setString(2, password);
-//      pstmt.executeUpdate();
+            pstmt.setString(1, username);
+            pstmt.setString(2, encryptedPass);
+            pstmt.executeUpdate();
+            
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    userId = generatedKeys.getInt(1);
+                } else throw new SQLException("User creation failed.");
+            }
+            
+            SQLite sqlite = new SQLite();
+            sqlite.addKeys(userId, key, iv);
         } catch (Exception ex) {
             System.out.print(ex);
         }
     }
     
     public void addUser(String username, String password, int role) {
-        String sql = "";
+        String sql = "INSERT INTO users(username,password,role) VALUES(?, ?, ?)";
+        String encryptedPass = "";
+        int userId = -1;
+        String key = "";
+        String iv = "";
         try {
             encryption = new EncryptionTool();
-            String encryptedPass = encryption.encryptMessage(password);
-            sql = "INSERT INTO users(username,password,role) VALUES('" + username + "','" + encryptedPass + "','" + role + "')";
-            String key = encryption.getKeyString();
-            String iv = encryption.getIvString();
-            SQLite sqlite = new SQLite();
-            sqlite.addKeys(key, iv);
+            encryptedPass = encryption.encryptMessage(password);
+            key = encryption.getKeyString();
+            iv = encryption.getIvString();
         } catch (Exception ex) {
             System.out.print(ex);
         }
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            // Error Handling
+            if(encryptedPass.isEmpty() && key.isEmpty() && iv.isEmpty()) {
+                throw new SQLException("User creation failed.");
+            } 
             
+            pstmt.setString(1, username);
+            pstmt.setString(2, encryptedPass);
+            pstmt.setInt(3, role);
+            pstmt.executeUpdate();
+            
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    userId = generatedKeys.getInt(1);
+                } else throw new SQLException("User creation failed.");
+            }
+            
+            SQLite sqlite = new SQLite();
+            sqlite.addKeys(userId, key, iv);
         } catch (Exception ex) {
             System.out.print(ex);
         }
     }
     
-    public void addKeys(String key, String iv) {
-        String sql = "INSERT INTO keys(key, iv) VALUES('" + key + "','" + iv + "')";
+    public void addKeys(int userId, String key, String iv) {
+        //String sql = "INSERT INTO keys(userId, key, iv) VALUES('" + userId + "','" + key + "','" + iv + "')";
+        String sql = "INSERT INTO keys(userId, key, iv) VALUES(?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, key);
+            pstmt.setString(3, iv);
+            pstmt.executeUpdate();
+            
         } catch (Exception ex) {
             System.out.print(ex);
         }
@@ -357,7 +393,7 @@ public class SQLite {
     }
     
     public ArrayList<Keys> getKeys(){
-        String sql = "SELECT userId, key, iv FROM keys";
+        String sql = "SELECT id, userId, key, iv FROM keys";
         ArrayList<Keys> keys = new ArrayList<Keys>();
         
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -365,7 +401,9 @@ public class SQLite {
             ResultSet rs = stmt.executeQuery(sql)){
             
             while (rs.next()) {
-                keys.add(new Keys(rs.getString("key"),
+                keys.add(new Keys(rs.getInt("id"),
+                                  rs.getInt("userId"),
+                                  rs.getString("key"),
                                   rs.getString("iv")));
             }
         } catch (Exception ex) {
@@ -407,7 +445,7 @@ public class SQLite {
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            System.out.println("Keys " + userId + " has been deleted.");
+            System.out.println("Keys of user " + userId + " has been deleted.");
         } catch (Exception ex) {
             System.out.print(ex);
         }

@@ -6,10 +6,12 @@ import Model.Keys;
 import Model.Logs;
 import Model.Product;
 import Model.User;
+import Utility.EncryptionTool;
 import View.Frame;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Scanner;
 
 
 
@@ -105,18 +107,15 @@ public class Main {
         }
         
         // Get keys
-        /**
-         * TODO FIX: Bug on the KEYS TABLE Primary Key AUTOINCREMENT.
-         * - always at 0.
-         */
         ArrayList<Keys> keys = sqlite.getKeys();
         for(int nCtr = 0; nCtr < keys.size(); nCtr++){
-            System.out.println("===== Keys " + (nCtr + 1) + " =====");
+            System.out.println("===== Keys " + keys.get(nCtr).getId() + " =====");
+            System.out.println(" UserID: " + keys.get(nCtr).getUserId());
             System.out.println(" Key: " + keys.get(nCtr).getKey());
             System.out.println(" IV: " + keys.get(nCtr).getIv());
         }
 
-//        // Debug Decryption
+//       // Debug Decryption
 //        try {
 //            //ArrayList<User> users = sqlite.getUsers();
 //            User user = users.get(0);

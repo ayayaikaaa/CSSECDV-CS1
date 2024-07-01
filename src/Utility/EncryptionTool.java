@@ -23,19 +23,12 @@ public class EncryptionTool {
         this.iv = this.generateIv();
     }
     
-    private SecretKey generateKey() {
-        try {
-            KeyGenerator generator = KeyGenerator.getInstance("AES");
-            generator.init(KEY_SIZE);
-            return generator.generateKey();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return null;
-    }
-    
+
     /**
-     * Encrypts a message using AES and encoded to Base64 string
+     * Encrypts a message using AES Cipher algorithm and encoded
+     * into Base64 String.
+     * 
+     * Algorithm uses a key and initialization vector.
      * 
      * @param message
      * @return String
@@ -46,8 +39,10 @@ public class EncryptionTool {
     }
     
     /**
-     * Decrypts an encrypted message from Base64 encoded string
-     * with AES algorithm
+     * Decrypts a a Base64 encoded String from the AES Cipher algorithm.
+     * 
+     * Hint: the correct key must be set with `setKey()` and
+     * the correct iv must be set with `setIv()`.
      * 
      * @param message
      * @return String
@@ -57,9 +52,19 @@ public class EncryptionTool {
         return decrypt(message);
     }
     
-//    public String decryptMessage(String message, SecretKey key) throws Exception {
-//        return decrypt(message, key);
-//    }
+    /**
+     * 
+     * @param message
+     * @param key
+     * @param iv
+     * @return String
+     * @throws Exception 
+     */
+    public String decryptMessage(String message, String key, String iv) throws Exception {
+        this.setKey(key);
+        this.setIv(iv);
+        return decrypt(message);
+    }
     
     /**
      * Returns the Base64 encoded String of the key contained in the 
@@ -112,6 +117,10 @@ public class EncryptionTool {
      */
     public String getIvString() { return encodeBase64(iv.getIV()); }
     
+    /**
+     * 
+     * @return IvParameterSpec
+     */
     public IvParameterSpec getIv() { return iv; }
     
         /**
@@ -119,36 +128,44 @@ public class EncryptionTool {
      * if this instance is used for decrypting messages encrypted with the 
      * EncryptionTool in the past.
      * 
-     * Hint: use `EncryptionTool.getKey()`
+     * Hint: use `getKey()`
      * 
      * @param key 
      */
     public void setKey(SecretKey key) { this.key = key; }
     
+    /**
+     * 
+     * @param key 
+     */
     public void setKey(byte[] key) { this.key = new SecretKeySpec(key, 0, key.length, "AES"); }
     
-    public void setKey(String key) { 
-        this.setKey(decodeBase64(key));
-    }
+    /**
+     * 
+     * @param key 
+     */
+    public void setKey(String key) { this.setKey(decodeBase64(key)); }
     
+    /**
+     * 
+     * @param iv 
+     */
     public void setIv(IvParameterSpec iv) { this.iv = iv; }
     
+    /**
+     * 
+     * @param iv 
+     */
     public void setIv(byte[] iv) { this.iv = new IvParameterSpec(iv); }
     
+    /**
+     * 
+     * @param iv 
+     */
     public void setIv(String iv) { 
         this.setIv(decodeBase64(iv)); 
     }
     
-    /**
-     * Encrypts a message using AES Cipher algorithm and encoded
-     * into Base64 String.
-     * 
-     * Algorithm uses a key and initialization vector.
-     * 
-     * @param message
-     * @return String
-     * @throws Exception 
-     */
     private String encrypt(String message) throws Exception {
         byte[] messageBytes = message.getBytes() ;
         encryptionCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -157,16 +174,6 @@ public class EncryptionTool {
         return encodeBase64(cipherText);
     }
     
-    /**
-     * Decrypts a a Base64 encoded String from the AES Cipher algorithm.
-     * 
-     * Hint: the correct key must be set with `EncryptionTool.setKey()` and
-     * the correct iv must be set with `EncryptionTool.setIv()`.
-     * 
-     * @param encryptedMessage
-     * @return String
-     * @throws Exception 
-     */
     private String decrypt(String encryptedMessage) throws Exception {
         byte[] messageBytes = decodeBase64(encryptedMessage);
         Cipher decryptionCipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -175,14 +182,21 @@ public class EncryptionTool {
         return new String(decryptedBytes);
     }
     
-    /**
-     * 
-     * @return 
-     */
     private IvParameterSpec generateIv() {
         byte[] iv = new byte[16];
         new SecureRandom().nextBytes(iv);
         return new IvParameterSpec(iv);
+    }
+    
+    private SecretKey generateKey() {
+        try {
+            KeyGenerator generator = KeyGenerator.getInstance("AES");
+            generator.init(KEY_SIZE);
+            return generator.generateKey();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
     }
     
     private String encodeBase64(byte[] encryptedBytes) { return Base64.getEncoder().encodeToString(encryptedBytes); }

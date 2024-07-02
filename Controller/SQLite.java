@@ -20,6 +20,11 @@ public class SQLite {
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
     public EncryptionTool encryption;
+    private EncryptionTool encryptionTool;
+    
+    public SQLite() {
+        this.encryptionTool = new EncryptionTool();
+    }
     
     public void createNewDatabase() {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
@@ -386,33 +391,47 @@ public class SQLite {
                                    rs.getString("username"),
                                    rs.getString("password"),
                                    rs.getInt("role"),
-                                   rs.getInt("locked")));
+                                   rs.getInt("locked"),
+                                   rs.getString("Iv")));
             }
         } catch (Exception ex) {}
         return users;
     }
     
-    public boolean authenticateUser(String username, String password) {
-    ArrayList<User> users = getUsers();
-    
-
-    for (User user : users) {
-        try {
-            int userId = user.getId();
-            String key = this.findKey(userId);
-            String iv = this.findKeyIV(userId);
-            encryption.setKey(key);
-            encryption.setIv(iv);
-            String decryptedPassword = encryption.decryptMessage(user.getPassword());
-            if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
-                return true;
+     public User getUserByUsername(String username) {
+        String sql = "SELECT id, username, password, role, locked FROM users WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new User(rs.getInt("id"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getInt("role"),
+                        rs.getInt("locked"),
+                        rs.getString("Iv"));
             }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    
+    public boolean authenticateUser(String username, String password) {
+        User user = getUserByUsername(username);
+        if (user == null) {
+            return false;
+        }
+        try {
+            encryption.setIv(user.getIv());
+            String encryptedPassword = encryption.encryptMessage(password);
+            return user.getPassword().equals(encryptedPassword);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return false;
         }
     }
-    return false;
-}
     
     public ArrayList<Keys> getKeys(){
         String sql = "SELECT id, userId, key, iv FROM keys";
@@ -487,37 +506,17 @@ public class SQLite {
         return false;
     }
     
-    public String findKey(int userId){
-        String sql = "SELECT * FROM keys WHERE userId = ?";
+    public boolean findKeys(int userId){
+        String sql = "SELECT COUNT(*) as count FROM keys WHERE userId= ?";
         try (Connection conn = DriverManager.getConnection(driverURL);
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
             pstmt.setInt(1, userId);
 
             ResultSet rs = pstmt.executeQuery();
-            if(!rs.getString("key").isEmpty()) {
-                return rs.getString("key");
-            } else throw new SQLException("Retrieval failed, String empty.");
+            if(rs.getInt("Count") > 0) return true;
         } catch (Exception ex) {
             System.out.print(ex);
         }
-        return "";
-    }
-    
-    public String findKeyIV(int userId){
-        String sql = "SELECT * FROM keys WHERE userId = ?";
-        try (Connection conn = DriverManager.getConnection(driverURL);
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, userId);
-
-            ResultSet rs = pstmt.executeQuery();
-            if(!rs.getString("iv").isEmpty()) {
-                return rs.getString("iv");
-            } else throw new SQLException("Retrieval failed, String empty.");
-        } catch (Exception ex) {
-            System.out.print(ex);
-        }
-        return "";
+        return false;
     }
 }

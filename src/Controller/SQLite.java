@@ -392,6 +392,23 @@ public class SQLite {
         return users;
     }
     
+    public boolean authenticateUser(String username, String password) {
+    ArrayList<User> users = getUsers();
+    
+
+    for (User user : users) {
+        try {
+            String decryptedPassword = encryption.decryptMessage(user.getPassword());
+            if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    return false;
+}
+    
     public ArrayList<Keys> getKeys(){
         String sql = "SELECT id, userId, key, iv FROM keys";
         ArrayList<Keys> keys = new ArrayList<Keys>();

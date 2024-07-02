@@ -398,6 +398,11 @@ public class SQLite {
 
     for (User user : users) {
         try {
+            int userId = user.getId();
+            String key = this.findKey(userId);
+            String iv = this.findKeyIV(userId);
+            encryption.setKey(key);
+            encryption.setIv(iv);
             String decryptedPassword = encryption.decryptMessage(user.getPassword());
             if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
                 return true;
@@ -482,17 +487,37 @@ public class SQLite {
         return false;
     }
     
-    public boolean findKeys(int userId){
-        String sql = "SELECT COUNT(*) as count FROM keys WHERE userId= ?";
+    public String findKey(int userId){
+        String sql = "SELECT * FROM keys WHERE userId = ?";
         try (Connection conn = DriverManager.getConnection(driverURL);
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
             pstmt.setInt(1, userId);
 
             ResultSet rs = pstmt.executeQuery();
-            if(rs.getInt("Count") > 0) return true;
+            if(!rs.getString("key").isEmpty()) {
+                return rs.getString("key");
+            } else throw new SQLException("Retrieval failed, String empty.");
         } catch (Exception ex) {
             System.out.print(ex);
         }
-        return false;
+        return "";
+    }
+    
+    public String findKeyIV(int userId){
+        String sql = "SELECT * FROM keys WHERE userId = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.getString("iv").isEmpty()) {
+                return rs.getString("iv");
+            } else throw new SQLException("Retrieval failed, String empty.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return "";
     }
 }

@@ -105,7 +105,12 @@ public class Login extends javax.swing.JPanel {
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
         String username = usernameFld.getText();
         String password = new String(passwordFld.getText());
-
+        
+        if (frame.userLocked(username)) {
+            JOptionPane.showMessageDialog(this, "Account is locked due to too many failed login attempts.", "Login Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         if (frame.authenticate(username, password)) {
             clearLoginFields();
             frame.mainNav(); // Navigate to main application

@@ -91,7 +91,8 @@ public class SQLite {
             + " username TEXT NOT NULL UNIQUE,\n"
             + " password TEXT NOT NULL,\n"
             + " role INTEGER DEFAULT 2,\n"
-            + " locked INTEGER DEFAULT 0\n"
+            + " locked INTEGER DEFAULT 0,\n"
+            + " failedAttempts INTEGER DEFAULT 0\n"
             + ");";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -373,6 +374,64 @@ public class SQLite {
         return products;
     }
     
+    public void updateFailedAttempts(String username, int attempts) {
+        String sql = "UPDATE users SET failedAttempts = ? WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, attempts);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+
+    public void lockUser(String username) {
+        String sql = "UPDATE users SET locked = 1 WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+
+    public void resetFailedAttempts(String username) {
+        updateFailedAttempts(username, 0);
+    }
+
+    public boolean isUserLocked(String username) {
+        String sql = "SELECT locked FROM users WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("locked") == 1;
+            }
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return false;
+    }
+
+    public int getFailedAttempts(String username) {
+        String sql = "SELECT failedAttempts FROM users WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("failedAttempts");
+            }
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return 0;
+    }
+    
+    
     public ArrayList<User> getUsers(){
         String sql = "SELECT id, username, password, role, locked FROM users";
         ArrayList<User> users = new ArrayList<User>();
@@ -386,33 +445,46 @@ public class SQLite {
                                    rs.getString("username"),
                                    rs.getString("password"),
                                    rs.getInt("role"),
-                                   rs.getInt("locked")));
+                                   rs.getInt("locked"),
+                                   rs.getInt("failedAttempts")));
             }
         } catch (Exception ex) {}
         return users;
     }
     
     public boolean authenticateUser(String username, String password) {
-    ArrayList<User> users = getUsers();
-    
+        ArrayList<User> users = getUsers();
+        SQLite sqlite = new SQLite();
 
-    for (User user : users) {
-        try {
-            int userId = user.getId();
-            String key = this.findKey(userId);
-            String iv = this.findKeyIV(userId);
-            encryption.setKey(key);
-            encryption.setIv(iv);
-            String decryptedPassword = encryption.decryptMessage(user.getPassword());
-            if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (sqlite.isUserLocked(username)) {
+            System.out.println("Account is locked due to too many failed login attempts.");
+            return false;
         }
+
+        for (User user : users) {
+            try {
+                int userId = user.getId();
+                String key = this.findKey(userId);
+                String iv = this.findKeyIV(userId);
+                encryption.setKey(key);
+                encryption.setIv(iv);
+                String decryptedPassword = encryption.decryptMessage(user.getPassword());
+                if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
+                    sqlite.resetFailedAttempts(username);
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        int attempts = sqlite.getFailedAttempts(username) + 1;
+        sqlite.updateFailedAttempts(username, attempts);
+        if (attempts >= 3) {
+            sqlite.lockUser(username);
+            System.out.println("Account locked due to too many failed login attempts.");
+        }
+        return false;
     }
-    return false;
-}
     
     public ArrayList<Keys> getKeys(){
         String sql = "SELECT id, userId, key, iv FROM keys";

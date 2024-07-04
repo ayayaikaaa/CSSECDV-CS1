@@ -43,6 +43,7 @@ public class Main {
         sqlite.createProductTable();
         sqlite.createUserTable();
         sqlite.createKeysTable();
+        sqlite.createLoginAttemptsTable();
         
         // Add sample history
         sqlite.addHistory("admin", "Antivirus", 1, "2019-04-03 14:30:00.000");

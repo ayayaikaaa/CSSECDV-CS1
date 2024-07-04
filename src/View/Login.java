@@ -2,6 +2,8 @@
 package View;
 
 import javax.swing.JOptionPane;
+import Model.User;
+import java.util.ArrayList;
 
 public class Login extends javax.swing.JPanel {
 
@@ -106,18 +108,21 @@ public class Login extends javax.swing.JPanel {
         String username = usernameFld.getText();
         String password = new String(passwordFld.getText());
         
-        if (frame.userLocked(username)) {
-            JOptionPane.showMessageDialog(this, "Account is locked due to too many failed login attempts.", "Login Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        
         if (frame.authenticate(username, password)) {
             clearLoginFields();
             frame.mainNav(); // Navigate to main application
         } else {
-            // Handle incorrect login credentials
-            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+        // Check if the user is locked out
+        ArrayList<User> users = frame.main.sqlite.getUsers();
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.getLocked() == 1) {
+                JOptionPane.showMessageDialog(this, "Your account is locked due to multiple failed login attempts. Please try again later.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         }
+        // Handle incorrect login credentials
+        JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

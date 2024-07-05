@@ -2,6 +2,8 @@
 package View;
 
 import javax.swing.JOptionPane;
+import Model.User;
+import java.util.ArrayList;
 
 public class Login extends javax.swing.JPanel {
 
@@ -12,7 +14,7 @@ public class Login extends javax.swing.JPanel {
     }
     
     public void clearLoginFields() {
-        usernameFld.setText(null);
+        EMAIL.setText(null);
         passwordFld.setText(null);
     }
 
@@ -21,11 +23,12 @@ public class Login extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        usernameFld = new javax.swing.JTextField();
+        EMAIL = new javax.swing.JTextField();
         passwordFld = new javax.swing.JPasswordField();
         registerBtn = new javax.swing.JButton();
         loginBtn = new javax.swing.JButton();
         forgotBtn = new javax.swing.JButton();
+
         setMaximumSize(new java.awt.Dimension(767, 473));
         setMinimumSize(new java.awt.Dimension(767, 473));
         setPreferredSize(new java.awt.Dimension(767, 473));
@@ -34,7 +37,7 @@ public class Login extends javax.swing.JPanel {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("SECURITY Svcs");
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-      
+
         EMAIL.setBackground(new java.awt.Color(240, 240, 240));
         EMAIL.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         EMAIL.setHorizontalAlignment(javax.swing.JTextField.CENTER);
@@ -132,16 +135,24 @@ public class Login extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
-        String username = usernameFld.getText();
+        String username = EMAIL.getText();
         String password = new String(passwordFld.getText());
-
+        
         if (frame.authenticate(username, password)) {
             clearLoginFields();
             frame.mainNav(); // Navigate to main application
         } else {
-            // Handle incorrect login credentials
-            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+        // Check if the user is locked out
+        ArrayList<User> users = frame.main.sqlite.getUsers();
+        for (User user : users) {
+            if (user.getUsername().equals(username) && user.getLocked() == 1) {
+                JOptionPane.showMessageDialog(this, "Your account is locked due to multiple failed login attempts. Please try again later.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         }
+        // Handle incorrect login credentials
+        JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
@@ -168,12 +179,13 @@ public class Login extends javax.swing.JPanel {
         else loginBtn.setEnabled(true);
     }//GEN-LAST:event_EMAILKeyReleased
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTextField EMAIL;
+    private javax.swing.JButton forgotBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JButton loginBtn;
     private javax.swing.JTextField passwordFld;
     private javax.swing.JButton registerBtn;
-    private javax.swing.JTextField usernameFld;
     // End of variables declaration//GEN-END:variables
 }

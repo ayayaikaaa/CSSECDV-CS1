@@ -20,10 +20,10 @@ public class ResetPassword extends javax.swing.JPanel {
     public Frame frame;
   
         
-    public void clearRegisterFields() {
-
-        passwordFld.setText(null);
-        confpassFld.setText(null);
+    public void clearResetFields() {
+        passwordLabel.setText(null);
+        confpassLabel.setText(null);
+        changeBtn.setEnabled(false);
     }
     
     public ResetPassword() {
@@ -154,7 +154,7 @@ public class ResetPassword extends javax.swing.JPanel {
     private void changeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeBtnActionPerformed
         frame.reset(frame.getUserEmail(), passwordFld.getText());
         frame.loginNav();
-        clearRegisterFields();
+        clearResetFields();
     }//GEN-LAST:event_changeBtnActionPerformed
 
     private void passwordFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_passwordFldKeyReleased
@@ -210,10 +210,7 @@ public class ResetPassword extends javax.swing.JPanel {
     }//GEN-LAST:event_confpassFldKeyReleased
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
-        clearRegisterFields();
-        passwordLabel.setText("");
-        confpassLabel.setText("");
-        changeBtn.setEnabled(false);
+        clearResetFields();
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 

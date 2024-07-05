@@ -169,17 +169,18 @@ public class EmailForgot extends javax.swing.JPanel {
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
+        clearForgotFields();
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void verifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyBtnActionPerformed
         String enteredOTP = otpFld.getText();
         String email = emailFld.getText();
         if (enteredOTP.equals(generatedOTP)) {
-            JOptionPane.showMessageDialog(this, "OTP verified successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "OTP Verified Successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForgotFields();
             frame.resetNav(email);
         } else {
-            JOptionPane.showMessageDialog(this, "Invalid OTP. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "OTP Verification Failed", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_verifyBtnActionPerformed
 
@@ -191,7 +192,7 @@ public class EmailForgot extends javax.swing.JPanel {
 
                 otpBtn.setEnabled(true); // Enable the submit button
             } else {
-                validationLabel.setText("Input valid email"); // Display validation message
+                validationLabel.setText("Email INVALID"); // Display validation message
                 validationLabel.setForeground(Color.RED);
                 otpBtn.setEnabled(false); // Disable the submit button
             }

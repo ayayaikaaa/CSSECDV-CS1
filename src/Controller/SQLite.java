@@ -476,7 +476,7 @@ public void editKey(int userId, String key, String iv) {
     
 public boolean authenticateUser(String username, String password) {
     ArrayList<User> users = getUsers();
-    
+    EncryptionTool encryption = new EncryptionTool();
     for (User user : users) {
         try {
             int userId = user.getId();

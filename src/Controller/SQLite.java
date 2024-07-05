@@ -391,28 +391,111 @@ public class SQLite {
         } catch (Exception ex) {}
         return users;
     }
-    
-    public boolean authenticateUser(String username, String password) {
-    ArrayList<User> users = getUsers();
-    
+    private void recordLoginAttempt(String username) {
+        String sql = "INSERT INTO login_attempts(username, attempt_time) VALUES(?, ?)";
+        executeUpdateWithRetry(sql, username, System.currentTimeMillis());
+    }
 
-    for (User user : users) {
-        try {
-            int userId = user.getId();
-            String key = this.findKey(userId);
-            String iv = this.findKeyIV(userId);
-            encryption.setKey(key);
-            encryption.setIv(iv);
-            String decryptedPassword = encryption.decryptMessage(user.getPassword());
-            if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
-                return true;
+    private int getLoginAttempts(String username) {
+        String sql = "SELECT COUNT(*) as count FROM login_attempts WHERE username = ? AND attempt_time > ?";
+        int maxAttemptsWindow = 60000; // 1 minute in milliseconds
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            pstmt.setLong(2, System.currentTimeMillis() - maxAttemptsWindow);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+
+    private long getLastAttemptTime(String username) {
+        String sql = "SELECT MAX(attempt_time) as last_attempt FROM login_attempts WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("last_attempt");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return 0;
+    }
+
+    private void lockUser(String username) {
+        String sql = "UPDATE users SET locked = 1 WHERE username = ?";
+        executeUpdateWithRetry(sql, username);
+    }
+
+    private void unlockUser(String username) {
+        String sql = "UPDATE users SET locked = 0 WHERE username = ?";
+        executeUpdateWithRetry(sql, username);
+    }
+
+    private void clearLoginAttempts(String username) {
+        String sql = "DELETE FROM login_attempts WHERE username = ?";
+        executeUpdateWithRetry(sql, username);
+    }
+
+    private void executeUpdateWithRetry(String sql, Object... params) {
+        for (int i = 0; i < 3; i++) { // Retry up to 3 times
+            try (Connection conn = DriverManager.getConnection(driverURL);
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                for (int j = 0; j < params.length; j++) {
+                    pstmt.setObject(j + 1, params[j]);
+                }
+                pstmt.executeUpdate();
+                return;
+            } catch (SQLException e) {
+                if (e.getErrorCode() == 5) { // SQLITE_BUSY
+                    try {
+                        Thread.sleep(100); // Wait for 100 ms before retrying
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                } else {
+                    e.printStackTrace();
+                    break;
+                }
+            }
         }
     }
-    return false;
-}
+
+    private void executeUpdate(String sql) {
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+  
+  public boolean authenticateUser(String username, String password) {
+		ArrayList<User> users = getUsers();
+		
+		for (User user : users) {
+			try {
+				int userId = user.getId();
+				String key = this.findKey(userId);
+				String iv = this.findKeyIV(userId);
+				encryption.setKey(key);
+				encryption.setIv(iv);
+				String decryptedPassword = encryption.decryptMessage(user.getPassword());
+				if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
+					return true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
     
     public ArrayList<Keys> getKeys(){
         String sql = "SELECT id, userId, key, iv FROM keys";

@@ -264,6 +264,14 @@ public class Frame extends javax.swing.JFrame {
         return main.sqlite.authenticateUser(username, password);
     }
 
+    public boolean check(String email) {
+        return main.sqlite.checkEmail(email);
+    }
+  
+//    public boolean userLocked(String username){
+//        return main.sqlite.isUserLocked(username);
+//    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Container;
     private javax.swing.JPanel Content;

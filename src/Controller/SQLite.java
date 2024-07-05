@@ -570,7 +570,7 @@ public void editKey(int userId, String key, String iv) {
         }
     }
 
-    public boolean authenticateUser(String username, String password) {
+public boolean authenticateUser(String username, String password) {
         ArrayList<User> users = getUsers();
         int maxAttempts = 3;
         int lockoutDuration = 60000; // 1 minute in milliseconds
@@ -622,8 +622,6 @@ public void editKey(int userId, String key, String iv) {
             e.printStackTrace();
         }
         return false;
-    }
-    return false;
 }
 
 

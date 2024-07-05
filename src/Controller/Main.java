@@ -60,8 +60,8 @@ public class Main {
         sqlite.addProduct("Scanner", 10, 100.0);
 
         // Add sample users
-        sqlite.addUser("admin", "qwerty1234" , 5);
-        sqlite.addUser("manager", "qwerty1234", 4);
+        sqlite.addUser("admin", "qwerty1234" , 5, "cssecdevadm@gmail.com");
+        sqlite.addUser("manager", "qwerty1234", 4, "cssecdevmanager@gmail.com");
 //        sqlite.addUser("staff", "qwerty1234", 3);
 //        sqlite.addUser("client1", "qwerty1234", 2);
 //        sqlite.addUser("client2", "qwerty1234", 2);

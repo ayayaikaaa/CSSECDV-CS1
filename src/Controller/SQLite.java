@@ -91,7 +91,8 @@ public class SQLite {
             + " username TEXT NOT NULL UNIQUE,\n"
             + " password TEXT NOT NULL,\n"
             + " role INTEGER DEFAULT 2,\n"
-            + " locked INTEGER DEFAULT 0\n"
+            + " locked INTEGER DEFAULT 0,\n"
+            + " email TEXT UNIQUE\n" 
             + ");";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -213,9 +214,87 @@ public class SQLite {
             System.out.print(ex);
         }
     }
+public void resetPassword(String email, String newPassword) {
+    // SQL to update password based on email
+    String sqlUpdatePassword = "UPDATE users SET password = ? WHERE email = ?";
+    String sqlSelectUserId = "SELECT id FROM users WHERE email = ?";
+    String encryptedPass = "";
+    String key = "";
+    String iv = "";
+    int userId = -1;
+    
+    try {
+        encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
+        encryptedPass = encryption.encryptMessage(newPassword); // Encrypt the new password
+        key = encryption.getKeyString(); // Get encryption key (if needed)
+        iv = encryption.getIvString(); // Get initialization vector (if needed)
+    } catch (Exception ex) {
+        System.out.print(ex); // Handle encryption exceptions (you might want to log or throw)
+    }
+    
+     try (Connection conn = DriverManager.getConnection(driverURL)) {
+        // Retrieve userId based on email
+        try (PreparedStatement pstmtSelect = conn.prepareStatement(sqlSelectUserId)) {
+            pstmtSelect.setString(1, email);
+            try (ResultSet rs = pstmtSelect.executeQuery()) {
+                if (rs.next()) {
+                    userId = rs.getInt("id");
+                } else {
+                    throw new SQLException("No user found with email: " + email);
+                }
+            }
+        }
+        
+        // Set parameters for the prepared statement
+        try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePassword)) {
+            pstmtUpdate.setString(1, encryptedPass); // Set encrypted password
+            pstmtUpdate.setString(2, email); // Set email
+            
+            int rowsUpdated = pstmtUpdate.executeUpdate(); // Execute the update
+            
+            if (rowsUpdated > 0) {
+                System.out.println("Password updated successfully for email: " + email);
+            } else {
+                throw new SQLException("Password update failed for email: " + email);
+            }
+        }
+            
+        System.out.println("userid: " + userId + "key: " + key + "iv: " + iv);
+        
+            SQLite sqlite = new SQLite();
+            sqlite.editKey(userId, key, iv);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+}
+
+public void editKey(int userId, String key, String iv) {
+    String sql = "UPDATE keys SET key = ?, iv = ? WHERE userId = ?";
+
+    try (Connection conn = DriverManager.getConnection(driverURL);
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setString(1, key);
+        pstmt.setString(2, iv);
+        pstmt.setInt(3, userId);
+        
+        int rowsUpdated = pstmt.executeUpdate();
+        
+        if (rowsUpdated > 0) {
+            System.out.println("Keys updated successfully for userId: " + userId);
+        } else {
+            System.out.println("No keys found for userId: " + userId);
+        }
+        
+    } catch (Exception ex) {
+        System.out.print(ex);
+    }
+}
+
+
     
     public void addUser(String username, String password) {
-        String sql = "INSERT INTO users(username,password) VALUES(?, ?)";
+        String sql = "INSERT INTO users(username,password,email) VALUES(?, ?, NULL)";
         String encryptedPass = "";
         int userId = -1;
         String key = "";
@@ -253,8 +332,8 @@ public class SQLite {
         }
     }
     
-    public void addUser(String username, String password, int role) {
-        String sql = "INSERT INTO users(username,password,role) VALUES(?, ?, ?)";
+    public void addUser(String username, String password, int role, String email) {
+        String sql = "INSERT INTO users(username,password,role,email) VALUES(?, ?, ?, ?)";
         String encryptedPass = "";
         int userId = -1;
         String key = "";
@@ -278,6 +357,7 @@ public class SQLite {
             pstmt.setString(1, username);
             pstmt.setString(2, encryptedPass);
             pstmt.setInt(3, role);
+            pstmt.setString(4, email);
             pstmt.executeUpdate();
             
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
@@ -298,7 +378,7 @@ public class SQLite {
         String sql = "INSERT INTO keys(userId, key, iv) VALUES(?, ?, ?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
+            PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)){
             
             pstmt.setInt(1, userId);
             pstmt.setString(2, key);
@@ -374,7 +454,7 @@ public class SQLite {
     }
     
     public ArrayList<User> getUsers(){
-        String sql = "SELECT id, username, password, role, locked FROM users";
+        String sql = "SELECT id, username, password, role, locked, email FROM users";
         ArrayList<User> users = new ArrayList<User>();
         
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -386,24 +466,39 @@ public class SQLite {
                                    rs.getString("username"),
                                    rs.getString("password"),
                                    rs.getInt("role"),
-                                   rs.getInt("locked")));
+                                   rs.getInt("locked"),
+                                   rs.getString("email")));
+                
             }
         } catch (Exception ex) {}
         return users;
     }
     
-    public boolean authenticateUser(String username, String password) {
+public boolean authenticateUser(String username, String password) {
     ArrayList<User> users = getUsers();
-    
-
+    EncryptionTool encryption = new EncryptionTool();
     for (User user : users) {
         try {
             int userId = user.getId();
             String key = this.findKey(userId);
             String iv = this.findKeyIV(userId);
+            
+            // Log the key and IV for debugging
+            System.out.println("Debug: Retrieved key: " + key + ", iv: " + iv + " for userId: " + userId);
+            
             encryption.setKey(key);
             encryption.setIv(iv);
-            String decryptedPassword = encryption.decryptMessage(user.getPassword());
+            
+            // Log the encrypted password for debugging
+            String encryptedPassword = user.getPassword();
+            System.out.println("Debug: Encrypted password: " + encryptedPassword);
+            
+            // Decrypt the password
+            String decryptedPassword = encryption.decryptMessage(encryptedPassword);
+            
+            // Log the decrypted password for debugging
+            System.out.println("Debug: Decrypted password: " + decryptedPassword);
+            
             if (user.getUsername().equals(username) && decryptedPassword.equals(password)) {
                 return true;
             }
@@ -413,7 +508,20 @@ public class SQLite {
     }
     return false;
 }
+
+
+    public boolean checkEmail(String email) {
+    ArrayList<User> users = getUsers();
     
+    for (User user : users) {
+        if (user.getEmail().equals(email)) {
+            return true; // Return true if email found
+        }
+    }
+    return false; // Return false if email not found
+}
+
+
     public ArrayList<Keys> getKeys(){
         String sql = "SELECT id, userId, key, iv FROM keys";
         ArrayList<Keys> keys = new ArrayList<Keys>();

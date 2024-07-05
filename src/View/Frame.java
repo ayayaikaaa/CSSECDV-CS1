@@ -206,6 +206,8 @@ public class Frame extends javax.swing.JFrame {
     public Main main;
     public Login loginPnl = new Login();
     public Register registerPnl = new Register();
+    public EmailForgot emailPnl = new EmailForgot();
+    public ResetPassword resetPnl = new ResetPassword();
     
     private AdminHome adminHomePnl = new AdminHome();
     private ManagerHome managerHomePnl = new ManagerHome();
@@ -223,6 +225,8 @@ public class Frame extends javax.swing.JFrame {
         this.main = controller;
         loginPnl.frame = this;
         registerPnl.frame = this;
+        emailPnl.frame = this;
+        resetPnl.frame = this;
         
         adminHomePnl.init(main.sqlite);
         clientHomePnl.init(main.sqlite);
@@ -232,6 +236,8 @@ public class Frame extends javax.swing.JFrame {
         Container.setLayout(frameView);
         Container.add(loginPnl, "loginPnl");
         Container.add(registerPnl, "registerPnl");
+        Container.add(emailPnl, "emailPnl");
+        Container.add(resetPnl, "resetPnl");
         Container.add(HomePnl, "homePnl");
         frameView.show(Container, "loginPnl");
         
@@ -255,13 +261,40 @@ public class Frame extends javax.swing.JFrame {
     public void registerNav(){
         frameView.show(Container, "registerPnl");
     }
+    public void forgotNav(){
+        frameView.show(Container, "forgotPnl");
+    }
+    
+    public void emailNav(){
+        frameView.show(Container, "emailPnl");
+    }
+    
+    private String userEmail;
+
+    public void setUserEmail(String email) {
+        this.userEmail = email;
+    }
+    public String getUserEmail() {
+        return userEmail;
+    }
+    
+    public void resetNav(String email){
+        setUserEmail(email);
+        frameView.show(Container, "resetPnl");
+    }
     
     public void registerAction(String username, String password, String confpass){
         main.sqlite.addUser(username, password);
     }
+    public void reset(String email, String password){
+        main.sqlite.resetPassword(email, password);
+    }
     
     public boolean authenticate(String username, String password) {
         return main.sqlite.authenticateUser(username, password);
+    }
+    public boolean check(String email) {
+        return main.sqlite.checkEmail(email);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

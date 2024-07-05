@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class SQLite {
+    private final int maxAttempts = 3;
+    private final int lockoutDuration = 60000; // 1 minute in milliseconds
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -92,6 +94,7 @@ public class SQLite {
             + " password TEXT NOT NULL,\n"
             + " role INTEGER DEFAULT 2,\n"
             + " locked INTEGER DEFAULT 0,\n"
+            + " lockout_time INTEGER DEFAULT 0,\n"
             + " email TEXT UNIQUE\n" 
             + ");";
 
@@ -129,7 +132,14 @@ public class SQLite {
             + " attempt_time INTEGER NOT NULL\n"
             + ");";
 
-        executeUpdate(sql);
+        //executeUpdate(sql);
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table loginAttempt in database.db created.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
     }
 
     
@@ -492,35 +502,35 @@ public void editKey(int userId, String key, String iv) {
 
     private int getLoginAttempts(String username) {
         String sql = "SELECT COUNT(*) as count FROM login_attempts WHERE username = ? AND attempt_time > ?";
-        int maxAttemptsWindow = 60000; // 1 minute in milliseconds
+        int attempts = 0;
         try (Connection conn = DriverManager.getConnection(driverURL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
-            pstmt.setLong(2, System.currentTimeMillis() - maxAttemptsWindow);
+            pstmt.setLong(2, System.currentTimeMillis() - lockoutDuration);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt("count");
+                attempts = rs.getInt("count");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return 0;
+        return attempts;
     }
 
-    private long getLastAttemptTime(String username) {
-        String sql = "SELECT MAX(attempt_time) as last_attempt FROM login_attempts WHERE username = ?";
-        try (Connection conn = DriverManager.getConnection(driverURL);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, username);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getLong("last_attempt");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return 0;
-    }
+//    private long getLastAttemptTime(String username) {
+//        String sql = "SELECT MAX(attempt_time) as last_attempt FROM login_attempts WHERE username = ?";
+//        try (Connection conn = DriverManager.getConnection(driverURL);
+//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//            pstmt.setString(1, username);
+//            ResultSet rs = pstmt.executeQuery();
+//            if (rs.next()) {
+//                return rs.getLong("last_attempt");
+//            }
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
+//        return 0;
+//    }
 
     private void lockUser(String username) {
         String sql = "UPDATE users SET locked = 1 WHERE username = ?";
@@ -529,11 +539,6 @@ public void editKey(int userId, String key, String iv) {
 
     private void unlockUser(String username) {
         String sql = "UPDATE users SET locked = 0 WHERE username = ?";
-        executeUpdateWithRetry(sql, username);
-    }
-
-    private void clearLoginAttempts(String username) {
-        String sql = "DELETE FROM login_attempts WHERE username = ?";
         executeUpdateWithRetry(sql, username);
     }
 
@@ -561,68 +566,121 @@ public void editKey(int userId, String key, String iv) {
         }
     }
 
-    private void executeUpdate(String sql) {
-        try (Connection conn = DriverManager.getConnection(driverURL);
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    private void resetLoginAttempts(String username) {
+        String sql = "DELETE FROM login_attempts WHERE username = ?";
+        executeUpdateWithRetry(sql, username);
     }
-
-public boolean authenticateUser(String username, String password) {
-        ArrayList<User> users = getUsers();
-        int maxAttempts = 3;
-        int lockoutDuration = 60000; // 1 minute in milliseconds
-
+    
+    private boolean isUserLocked(String username) {
+        String sql = "SELECT locked, lockout_time FROM users WHERE username = ?";
         try (Connection conn = DriverManager.getConnection(driverURL);
-             PreparedStatement pstmt = conn.prepareStatement("SELECT locked FROM users WHERE username = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 int locked = rs.getInt("locked");
-                if (locked == 1) {
-                    // Check if lockout duration has passed
-                    long lastAttemptTime = getLastAttemptTime(username);
-                    if (System.currentTimeMillis() - lastAttemptTime > lockoutDuration) {
-                        // Unlock the user
-                        unlockUser(username);
+                long lockoutTime = rs.getLong("lockout_time");
+                if (locked == 1 && System.currentTimeMillis() < lockoutTime + lockoutDuration) {
+                    return true;
+                } else if (locked == 1) {
+                    unlockUser(username);
+                    return false;
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    
+//public boolean authenticateUser(String username, String password) {
+//        ArrayList<User> users = getUsers();
+//        int maxAttempts = 3;
+//        int lockoutDuration = 60000; // 1 minute in milliseconds
+//
+//        try (Connection conn = DriverManager.getConnection(driverURL);
+//             PreparedStatement pstmt = conn.prepareStatement("SELECT locked FROM users WHERE username = ?")) {
+//            pstmt.setString(1, username);
+//            ResultSet rs = pstmt.executeQuery();
+//            if (rs.next()) {
+//                int locked = rs.getInt("locked");
+//                if (locked == 1) {
+//                    // Check if lockout duration has passed
+//                    long lastAttemptTime = getLastAttemptTime(username);
+//                    if (System.currentTimeMillis() - lastAttemptTime > lockoutDuration) {
+//                        // Unlock the user
+//                        unlockUser(username);
+//                    } else {
+//                        return false;
+//                    }
+//                }
+//            }
+//
+//            // Track login attempts
+//            int attempts = getLoginAttempts(username);
+//            if (attempts >= maxAttempts) {
+//                lockUser(username);
+//                return false;
+//            }
+//
+//            for (User user : users) {
+//                if (user.getUsername().equals(username)) {
+//                    int userId = user.getId();
+//                    String key = this.findKey(userId);
+//                    String iv = this.findKeyIV(userId);
+//                    encryption.setKey(key);
+//                    encryption.setIv(iv);
+//                    String decryptedPassword = encryption.decryptMessage(user.getPassword());
+//                    if (decryptedPassword.equals(password)) {
+//                        return true;
+//                    }
+//                    break;
+//                }
+//            }
+//
+//            recordLoginAttempt(username);
+//            return false;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return false;
+//}
+    
+    public boolean authenticateUser(String username, String password) {
+        try {
+            if (isUserLocked(username)) {
+                System.out.println("User is currently locked.");
+                return false;
+            }
+
+            ArrayList<User> users = getUsers();
+            for (User user : users) {
+                if (user.getUsername().equals(username)) {
+                    encryption = new EncryptionTool();
+                    int userId = user.getId();
+                    encryption.setKey(this.findKey(userId));
+                    encryption.setIv(this.findKeyIV(userId));
+                    String decryptedPassword = encryption.decryptMessage(user.getPassword());
+                    if (decryptedPassword.equals(password)) {
+                        resetLoginAttempts(username);
+                        return true;
                     } else {
+                        recordLoginAttempt(username);
+                        if (getLoginAttempts(username) >= maxAttempts) {
+                            lockUser(username);
+                        }
                         return false;
                     }
                 }
             }
-
-            // Track login attempts
-            int attempts = getLoginAttempts(username);
-            if (attempts >= maxAttempts) {
-                lockUser(username);
-                return false;
-            }
-
-            for (User user : users) {
-                if (user.getUsername().equals(username)) {
-                    int userId = user.getId();
-                    String key = this.findKey(userId);
-                    String iv = this.findKeyIV(userId);
-                    encryption.setKey(key);
-                    encryption.setIv(iv);
-                    String decryptedPassword = encryption.decryptMessage(user.getPassword());
-                    if (decryptedPassword.equals(password)) {
-                        clearLoginAttempts(username);
-                        return true;
-                    }
-                    break;
-                }
-            }
-
-            recordLoginAttempt(username);
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         return false;
-}
+    }
+
+    
+    
 
 
 public boolean checkEmail(String email) {

@@ -146,7 +146,7 @@ public class Login extends javax.swing.JPanel {
         ArrayList<User> users = frame.main.sqlite.getUsers();
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getLocked() == 1) {
-                JOptionPane.showMessageDialog(this, "Your account is locked due to multiple failed login attempts. Please try again later.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "3 incorrect login attempts. Try again later", "Login Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
         }

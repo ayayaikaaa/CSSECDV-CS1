@@ -29,8 +29,9 @@ public class EmailForgot extends javax.swing.JPanel {
        public void clearForgotFields() {
         otpFld.setText(null);
         validationLabel.setText(null);
-        verifyBtn.setEnabled(false);
         otpBtn.setEnabled(false);
+        emailFld.setText(null);
+        usernameFld.setText(null);
     }
     
     
@@ -51,6 +52,7 @@ public class EmailForgot extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         otpFld = new javax.swing.JTextField();
         otpBtn = new javax.swing.JButton();
+        usernameFld = new javax.swing.JTextField();
 
         setMaximumSize(new java.awt.Dimension(767, 473));
         setMinimumSize(new java.awt.Dimension(767, 473));
@@ -59,6 +61,18 @@ public class EmailForgot extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("SECURITY Svcs");
+
+        usernameFld.setBackground(new java.awt.Color(240, 240, 240));
+        usernameFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        usernameFld.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        usernameFld.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), "USERNAME", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
+        usernameFld.setMaximumSize(new java.awt.Dimension(64, 45));
+
+        usernameFld.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                usernameFldKeyRelease(evt);
+            }
+        });
 
         emailFld.setBackground(new java.awt.Color(240, 240, 240));
         emailFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -96,6 +110,10 @@ public class EmailForgot extends javax.swing.JPanel {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Enter EMAIL to RESET PASSWORD");
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Enter EMAIL to RESET PASSWORD");
+        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         otpFld.setBackground(new java.awt.Color(240, 240, 240));
         otpFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -124,84 +142,107 @@ public class EmailForgot extends javax.swing.JPanel {
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
+
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(backBtn)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(100, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(emailFld, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(otpFld, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(verifyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(otpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(validationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 546, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(118, Short.MAX_VALUE))
+                                        .addComponent(backBtn)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addContainerGap(100, Short.MAX_VALUE)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(usernameFld, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addGroup(layout.createSequentialGroup()
+                                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(emailFld, javax.swing.GroupLayout.PREFERRED_SIZE, 338, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(otpFld, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addGap(18, 18, 18)
+                                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                        .addComponent(verifyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(otpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(validationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 546, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addContainerGap(118, Short.MAX_VALUE))
         );
+
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(backBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 111, Short.MAX_VALUE)
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(emailFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(otpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(validationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(verifyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(otpFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(111, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(backBtn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 111, Short.MAX_VALUE)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(40, 40, 40)
+                                .addComponent(jLabel2)
+                                .addComponent(usernameFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(emailFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(otpBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(validationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(verifyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(otpFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(111, Short.MAX_VALUE))
         );
+
+
+
+
     }// </editor-fold>//GEN-END:initComponents
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
+        clearForgotFields();
         clearForgotFields();
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void verifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyBtnActionPerformed
         String enteredOTP = otpFld.getText();
         String email = emailFld.getText();
-        if (enteredOTP.equals(generatedOTP)) {
+        if (enteredOTP.equals(generatedOTP) && matchEmail(emailFld.getText().toLowerCase(), usernameFld.getText().toLowerCase())) {
             JOptionPane.showMessageDialog(this, "OTP Verified Successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForgotFields();
             frame.resetNav(email);
         } else {
             JOptionPane.showMessageDialog(this, "OTP Verification Failed", "Error", JOptionPane.ERROR_MESSAGE);
+            clearForgotFields();
         }
     }//GEN-LAST:event_verifyBtnActionPerformed
 
     private void emailFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_emailFldKeyReleased
         String email = emailFld.getText();
         if (!email.equals("")) {
-            if (isValidEmail(email)) {
+            if (isValidEmail(email) && !usernameFld.getText().equalsIgnoreCase("admin") && !usernameFld.getText().equalsIgnoreCase("manager")) {
                 validationLabel.setText(""); // Clear any validation message
-
+                verifyBtn.setEnabled(true);
                 otpBtn.setEnabled(true); // Enable the submit button
             } else {
-                validationLabel.setText("Email INVALID"); // Display validation message
+                validationLabel.setText("Invalid Credentials"); // Display validation message
                 validationLabel.setForeground(Color.RED);
+                verifyBtn.setEnabled(false);
                 otpBtn.setEnabled(false); // Disable the submit button
             }
         } else {
             validationLabel.setText(""); // Clear any validation message
             validationLabel.setForeground(Color.RED);
+            verifyBtn.setEnabled(false);
             otpBtn.setEnabled(false); // Disable the submit button if the field is empty
         }
     }//GEN-LAST:event_emailFldKeyReleased
+
+    private void usernameFldKeyRelease(java.awt.event.KeyEvent evt){
+        String email = emailFld.getText();
+        if(usernameFld.getText().equalsIgnoreCase("admin") || usernameFld.getText().equalsIgnoreCase("manager") || email.equals("")){
+            verifyBtn.setEnabled(false);
+            otpBtn.setEnabled(false);
+        }else{
+            verifyBtn.setEnabled(true);
+            otpBtn.setEnabled(true);
+        }
+    }
 
     private void emailFldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_emailFldActionPerformed
         // TODO add your handling code here:
@@ -224,7 +265,7 @@ public class EmailForgot extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(this, "If email is valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
             }
             else{
-                JOptionPane.showMessageDialog(this, "If email is valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "If valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
             }
                 
         }
@@ -273,6 +314,18 @@ public class EmailForgot extends javax.swing.JPanel {
         }
     }
 
+    private boolean matchEmail(String email, String username){
+        try {
+            if (this.frame.main.sqlite.getUser(username).getEmail().equals(email)) {
+                return true;
+            } else {
+                return false;
+            }
+        }catch(Exception error){
+            return false;
+        }
+    }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
@@ -284,4 +337,6 @@ public class EmailForgot extends javax.swing.JPanel {
     private javax.swing.JLabel validationLabel;
     private javax.swing.JButton verifyBtn;
     // End of variables declaration//GEN-END:variables
+
+    private javax.swing.JTextField usernameFld;
 }

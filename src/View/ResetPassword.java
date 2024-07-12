@@ -152,6 +152,7 @@ public class ResetPassword extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void changeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeBtnActionPerformed
+        clearResetFields();
         frame.reset(frame.getUserEmail(), passwordFld.getText());
         frame.loginNav();
         clearResetFields();

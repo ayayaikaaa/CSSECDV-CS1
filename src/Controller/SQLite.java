@@ -238,55 +238,63 @@ public class SQLite {
 public void resetPassword(String email, String newPassword) {
     // SQL to update password based on email
     String sqlUpdatePassword = "UPDATE users SET password = ? WHERE email = ?";
-    String sqlSelectUserId = "SELECT id FROM users WHERE email = ?";
+    String sqlSelectUserIdAndUsername = "SELECT id, username FROM users WHERE email = ?";
     String encryptedPass = "";
     String key = "";
     String iv = "";
     int userId = -1;
-    
+    String username = "";
+
     try {
-        encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
+        EncryptionTool encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
         encryptedPass = encryption.encryptMessage(newPassword); // Encrypt the new password
         key = encryption.getKeyString(); // Get encryption key (if needed)
         iv = encryption.getIvString(); // Get initialization vector (if needed)
     } catch (Exception ex) {
         System.out.print(ex); // Handle encryption exceptions (you might want to log or throw)
     }
-    
-     try (Connection conn = DriverManager.getConnection(driverURL)) {
-        // Retrieve userId based on email
-        try (PreparedStatement pstmtSelect = conn.prepareStatement(sqlSelectUserId)) {
+
+    try (Connection conn = DriverManager.getConnection(driverURL)) {
+        // Retrieve userId and username based on email
+        try (PreparedStatement pstmtSelect = conn.prepareStatement(sqlSelectUserIdAndUsername)) {
             pstmtSelect.setString(1, email);
             try (ResultSet rs = pstmtSelect.executeQuery()) {
                 if (rs.next()) {
                     userId = rs.getInt("id");
+                    username = rs.getString("username");
                 } else {
                     throw new SQLException("No user found with email: " + email);
                 }
             }
         }
-        
+
+        // Check if the username is 'admin' or 'manager'
+        if ("admin".equalsIgnoreCase(username) || "manager".equalsIgnoreCase(username)) {
+            System.out.println("Password update not allowed for user with username: " + username);
+            return;
+        }
+
         // Set parameters for the prepared statement
         try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePassword)) {
             pstmtUpdate.setString(1, encryptedPass); // Set encrypted password
             pstmtUpdate.setString(2, email); // Set email
-            
+
             int rowsUpdated = pstmtUpdate.executeUpdate(); // Execute the update
-            
+
             if (rowsUpdated > 0) {
                 System.out.println("Password updated successfully for email: " + email);
             } else {
                 throw new SQLException("Password update failed for email: " + email);
             }
         }
-            
-        System.out.println("userid: " + userId + "key: " + key + "iv: " + iv);
-        
-            SQLite sqlite = new SQLite();
-            sqlite.editKey(userId, key, iv);
-        } catch (Exception ex) {
-            System.out.print(ex);
-        }
+
+        System.out.println("userid: " + userId + " key: " + key + " iv: " + iv);
+
+        SQLite sqlite = new SQLite();
+        sqlite.editKey(userId, key, iv);
+    } catch (Exception ex) {
+        System.out.print(ex);
+    }
 }
 
 public void editKey(int userId, String key, String iv) {
@@ -800,5 +808,23 @@ public boolean checkEmail(String email) {
             System.out.print(ex);
         }
         return "";
+    }
+
+    public User getUser(String username){
+        String sql = "SELECT * FROM users WHERE username='" + username + "';";
+        User user = null;
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)){
+            user = new User(rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getInt("role"),
+                    rs.getInt("locked"),
+                    rs.getString("email"));
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return user;
     }
 }

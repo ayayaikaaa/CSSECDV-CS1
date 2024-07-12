@@ -25,5 +25,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="javax.activation-1.2.0" level="project" />
+    <orderEntry type="library" name="javax.mail" level="project" />
+    <orderEntry type="library" name="sqlite-jdbc-3.23.1" level="project" />
   </component>
 </module>

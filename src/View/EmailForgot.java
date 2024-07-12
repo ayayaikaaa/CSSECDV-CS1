@@ -110,6 +110,10 @@ public class EmailForgot extends javax.swing.JPanel {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("Enter EMAIL to RESET PASSWORD");
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Enter EMAIL to RESET PASSWORD");
+        jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
         otpFld.setBackground(new java.awt.Color(240, 240, 240));
         otpFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -191,6 +195,7 @@ public class EmailForgot extends javax.swing.JPanel {
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
+        clearForgotFields();
         clearForgotFields();
     }//GEN-LAST:event_backBtnActionPerformed
 

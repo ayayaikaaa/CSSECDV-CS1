@@ -177,7 +177,6 @@ public class Login extends javax.swing.JPanel {
     private void EMAILKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_EMAILKeyReleased
         if(EMAIL.getText().equals("") || passwordFld.getText().equals("")) loginBtn.setEnabled(false);
         else loginBtn.setEnabled(true);
-
     }//GEN-LAST:event_EMAILKeyReleased
 
 

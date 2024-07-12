@@ -58,6 +58,10 @@ public class EmailForgot extends javax.swing.JPanel {
         setMinimumSize(new java.awt.Dimension(767, 473));
         setPreferredSize(new java.awt.Dimension(767, 473));
 
+        setMaximumSize(new java.awt.Dimension(767, 473));
+        setMinimumSize(new java.awt.Dimension(767, 473));
+        setPreferredSize(new java.awt.Dimension(767, 473));
+
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("SECURITY Svcs");
@@ -160,6 +164,7 @@ public class EmailForgot extends javax.swing.JPanel {
                                                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                         .addComponent(validationLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 546, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                 .addContainerGap(118, Short.MAX_VALUE))
+
         );
 
         layout.setVerticalGroup(
@@ -182,6 +187,7 @@ public class EmailForgot extends javax.swing.JPanel {
                                         .addComponent(verifyBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(otpFld, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap(111, Short.MAX_VALUE))
+
         );
 
 
@@ -197,13 +203,16 @@ public class EmailForgot extends javax.swing.JPanel {
     private void verifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyBtnActionPerformed
         String enteredOTP = otpFld.getText();
         String email = emailFld.getText();
+
         if (enteredOTP.equals(generatedOTP) && matchEmail(emailFld.getText().toLowerCase(), usernameFld.getText().toLowerCase())) {
+
             JOptionPane.showMessageDialog(this, "OTP Verified Successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForgotFields();
             frame.resetNav(email);
         } else {
             JOptionPane.showMessageDialog(this, "OTP Verification Failed", "Error", JOptionPane.ERROR_MESSAGE);
             clearForgotFields();
+
         }
     }//GEN-LAST:event_verifyBtnActionPerformed
 
@@ -216,6 +225,7 @@ public class EmailForgot extends javax.swing.JPanel {
                 otpBtn.setEnabled(true); // Enable the submit button
             } else {
                 validationLabel.setText("Invalid Credentials"); // Display validation message
+
                 validationLabel.setForeground(Color.RED);
                 verifyBtn.setEnabled(false);
                 otpBtn.setEnabled(false); // Disable the submit button

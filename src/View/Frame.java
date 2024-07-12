@@ -283,8 +283,8 @@ public class Frame extends javax.swing.JFrame {
         frameView.show(Container, "resetPnl");
     }
     
-    public void registerAction(String username, String password, String confpass){
-        main.sqlite.addUser(username, password);
+    public void registerAction(String username, String password, String confpass, String email){
+        main.sqlite.addUser(username, password,2, email);
     }
     public void reset(String email, String password){
         main.sqlite.resetPassword(email, password);

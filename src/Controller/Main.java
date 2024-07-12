@@ -64,7 +64,7 @@ public class Main {
         sqlite.addUser("admin", "LordSebar@Nen=!" , 5, "cssecdevadm@gmail.com");
         sqlite.addUser("manager", "SenGun+Neumic21*", 4, "cssecdevmanager@gmail.com");
 //        sqlite.addUser("staff", "qwerty1234", 3);
-//        sqlite.addUser("client1", "qwerty1234", 2);
+        sqlite.addUser("client1", "qwerty1234", 2, "matthew_adrian_u_chua@dlsu.edu.ph");
 //        sqlite.addUser("client2", "qwerty1234", 2);
         
         

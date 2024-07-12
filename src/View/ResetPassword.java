@@ -24,6 +24,10 @@ public class ResetPassword extends javax.swing.JPanel {
         passwordLabel.setText(null);
         confpassLabel.setText(null);
         changeBtn.setEnabled(false);
+    public void clearResetFields() {
+        passwordLabel.setText(null);
+        confpassLabel.setText(null);
+        changeBtn.setEnabled(false);
     }
     
     public ResetPassword() {
@@ -46,6 +50,10 @@ public class ResetPassword extends javax.swing.JPanel {
         backBtn = new javax.swing.JButton();
         passwordLabel = new javax.swing.JLabel();
         confpassLabel = new javax.swing.JLabel();
+
+        setMaximumSize(new java.awt.Dimension(111, 36));
+        setMinimumSize(new java.awt.Dimension(111, 36));
+        setPreferredSize(new java.awt.Dimension(111, 36));
 
         setMaximumSize(new java.awt.Dimension(111, 36));
         setMinimumSize(new java.awt.Dimension(111, 36));
@@ -109,9 +117,11 @@ public class ResetPassword extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(0, 0, 0)
+                .addGap(0, 0, 0)
                 .addComponent(backBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(198, Short.MAX_VALUE)
                 .addContainerGap(198, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(confpassFld)
@@ -126,6 +136,8 @@ public class ResetPassword extends javax.swing.JPanel {
                         .addComponent(changeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(211, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(211, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(confpassLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -136,17 +148,23 @@ public class ResetPassword extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(backBtn)
                 .addGap(18, 18, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGap(18, 18, 18)
                 .addComponent(passwordFld, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(passwordLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(confpassFld, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(confpassLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(changeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(123, Short.MAX_VALUE))
                 .addContainerGap(123, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -211,6 +229,7 @@ public class ResetPassword extends javax.swing.JPanel {
     }//GEN-LAST:event_confpassFldKeyReleased
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        clearResetFields();
         clearResetFields();
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed

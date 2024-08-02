@@ -15,6 +15,7 @@ public class Register extends javax.swing.JPanel {
         usernameFld.setText(null);
         passwordFld.setText(null);
         confpassFld.setText(null);
+        emailFld.setText(null);
     }
     
     @SuppressWarnings("unchecked")
@@ -30,6 +31,7 @@ public class Register extends javax.swing.JPanel {
         passwordLabel = new javax.swing.JLabel();
         confpassLabel = new javax.swing.JLabel();
         usernameLabel = new javax.swing.JLabel();
+        emailFld = new javax.swing.JTextField();
 
         registerBtn.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         registerBtn.setText("REGISTER");
@@ -54,9 +56,29 @@ public class Register extends javax.swing.JPanel {
         usernameFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         usernameFld.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         usernameFld.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), "USERNAME", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
+        usernameFld.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                usernameFldActionPerformed(evt);
+            }
+        });
         usernameFld.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 usernameFldKeyReleased(evt);
+            }
+        });
+
+        emailFld.setBackground(new java.awt.Color(240, 240, 240));
+        emailFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        emailFld.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        emailFld.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), "EMAIL", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
+        emailFld.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                usernameFldActionPerformed(evt);
+            }
+        });
+        emailFld.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                emailFldKeyReleased(evt);
             }
         });
 
@@ -94,10 +116,6 @@ public class Register extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(backBtn)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(198, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -106,6 +124,7 @@ public class Register extends javax.swing.JPanel {
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(passwordFld, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(confpassFld)
+                        .addComponent(emailFld)
                     .addComponent(confpassLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(usernameFld, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap(199, Short.MAX_VALUE))
@@ -113,19 +132,24 @@ public class Register extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(registerBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(backBtn)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(backBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(40, 40, 40)
                 .addComponent(usernameFld, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(usernameLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(emailFld, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(passwordFld, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(passwordLabel)
@@ -140,8 +164,8 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        if(!frame.main.sqlite.findUser(usernameFld.getText())){
-            frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        if(!frame.main.sqlite.findUser(usernameFld.getText()) && !frame.main.sqlite.checkEmail(emailFld.getText())){
+            frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText(), emailFld.getText());
             JOptionPane.showMessageDialog(this, "Registration Successful", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearRegisterFields();
             passwordLabel.setText("");
@@ -149,7 +173,7 @@ public class Register extends javax.swing.JPanel {
             registerBtn.setEnabled(false);
             frame.loginNav();
         } else {
-            JOptionPane.showMessageDialog(this, "Registration Failed", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Registration Failed (Username or Email taken)", "Error", JOptionPane.ERROR_MESSAGE);
             clearRegisterFields();
             passwordLabel.setText("");
             confpassLabel.setText("");
@@ -174,6 +198,10 @@ public class Register extends javax.swing.JPanel {
                                 confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
                                 confpassLabel.setForeground(Color.RED);
                                 registerBtn.setEnabled(false);
+                            }else if(!isValidEmail(emailFld.getText())){
+                                confpassLabel.setText("Passwords MATCH but email is INVALID");
+                                confpassLabel.setForeground(Color.RED);
+                                registerBtn.setEnabled(false);
                             } else {
                                 confpassLabel.setText("Passwords MATCH");
                                 confpassLabel.setForeground(Color.GREEN);
@@ -183,6 +211,10 @@ public class Register extends javax.swing.JPanel {
                         if (usernameFld.getText().equals("")){
                             confpassLabel.setText("Passwords MATCH but username is EMPTY");
                             confpassLabel.setForeground(Color.RED);
+                        }else if(!isValidEmail(emailFld.getText())){
+                            confpassLabel.setText("Passwords MATCH but email is INVALID");
+                            confpassLabel.setForeground(Color.RED);
+                            registerBtn.setEnabled(false);
                         } else {
                             confpassLabel.setText("Passwords MATCH but username is INVALID");
                             confpassLabel.setForeground(Color.RED);
@@ -213,6 +245,10 @@ public class Register extends javax.swing.JPanel {
                     confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
                     confpassLabel.setForeground(Color.RED);
                     registerBtn.setEnabled(false);
+                }else if(!isValidEmail(emailFld.getText())){
+                    confpassLabel.setText("Passwords MATCH but email is INVALID");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
                 } else {
                     confpassLabel.setText("Passwords MATCH");
                     confpassLabel.setForeground(Color.GREEN);
@@ -223,6 +259,10 @@ public class Register extends javax.swing.JPanel {
                     usernameLabel.setText("");
                     confpassLabel.setText("Passwords MATCH but username is EMPTY");
                     confpassLabel.setForeground(Color.RED);
+                }else if(!isValidEmail(emailFld.getText())){
+                    confpassLabel.setText("Passwords MATCH but email is INVALID");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
                 } else {
                     confpassLabel.setText("Passwords MATCH but username is INVALID");
                     confpassLabel.setForeground(Color.RED);
@@ -250,6 +290,10 @@ public class Register extends javax.swing.JPanel {
                     confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
                     confpassLabel.setForeground(Color.RED);
                     registerBtn.setEnabled(false);
+                }else if(!isValidEmail(emailFld.getText())){
+                    confpassLabel.setText("Passwords MATCH but email is INVALID");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
                 } else {
                     confpassLabel.setText("Passwords MATCH");
                     confpassLabel.setForeground(Color.GREEN);
@@ -264,6 +308,43 @@ public class Register extends javax.swing.JPanel {
             }
         }
     }//GEN-LAST:event_usernameFldKeyReleased
+
+    private void emailFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_usernameFldKeyReleased
+        if (usernameFld.getText().equals("")){
+            usernameLabel.setText("");
+            if (!passwordFld.getText().equals("") && isPassSame()){
+                confpassLabel.setText("Passwords MATCH but username is EMPTY");
+                confpassLabel.setForeground(Color.RED);
+                registerBtn.setEnabled(false);
+            }
+        } else if (isUsernameValid()) {
+            if (!passwordFld.getText().equals("") && isPassSame()){
+                if(checkPassStrength() != 5) {
+                    confpassLabel.setText("Passwords MATCH but NOT STRONG enough");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
+                }else if(!isValidEmail(emailFld.getText())){
+                    confpassLabel.setText("Passwords MATCH but email is INVALID");
+                    confpassLabel.setForeground(Color.RED);
+                    registerBtn.setEnabled(false);
+                }else {
+                    confpassLabel.setText("Passwords MATCH");
+                    confpassLabel.setForeground(Color.GREEN);
+                    registerBtn.setEnabled(true);
+                }
+            }
+        } else {
+            if (!passwordFld.getText().equals("") && isPassSame()){
+                confpassLabel.setText("Passwords MATCH but username is INVALID");
+                confpassLabel.setForeground(Color.RED);
+                registerBtn.setEnabled(false);
+            }
+        }
+    }//GEN-LAST:event_usernameFldKeyReleased
+
+    private void usernameFldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameFldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_usernameFldActionPerformed
     
     public boolean checkUsernameValidity(String username){
         if(username.length() < 4 || username.length() > 16) return false;
@@ -373,6 +454,11 @@ public class Register extends javax.swing.JPanel {
         
         return currentStrength;
     }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
     
     public boolean isPassSame(){
         return confpassFld.getText().equals(passwordFld.getText());
@@ -389,4 +475,6 @@ public class Register extends javax.swing.JPanel {
     private javax.swing.JTextField usernameFld;
     private javax.swing.JLabel usernameLabel;
     // End of variables declaration//GEN-END:variables
+
+    private javax.swing.JTextField emailFld;
 }

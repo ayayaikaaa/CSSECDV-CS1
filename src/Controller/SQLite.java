@@ -687,20 +687,16 @@ public void editKey(int userId, String key, String iv) {
         return false;
     }
 
-    
-    
+    public boolean checkEmail(String email) {
+        ArrayList<User> users = getUsers();
 
-
-public boolean checkEmail(String email) {
-    ArrayList<User> users = getUsers();
-    
-    for (User user : users) {
-        if (user.getEmail().equals(email)) {
-            return true; // Return true if email found
+        for (User user : users) {
+            if (user.getEmail().equals(email)) {
+                return true; // Return true if email found
+            }
         }
+        return false; // Return false if email not found
     }
-    return false; // Return false if email not found
-}
 
 
     public ArrayList<Keys> getKeys(){
@@ -843,5 +839,10 @@ public boolean checkEmail(String email) {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+    
+    public void purchaseProduct(String name, int amount) {
+        String sql = "UPDATE product SET stock = stock -" + amount + " WHERE name = ?";
+        executeUpdateWithRetry(sql, name);
     }
 }

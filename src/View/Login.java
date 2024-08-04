@@ -1,6 +1,7 @@
 
 package View;
 
+import Controller.SQLite;
 import javax.swing.JOptionPane;
 import Model.User;
 import java.util.ArrayList;
@@ -140,7 +141,8 @@ public class Login extends javax.swing.JPanel {
         
         if (frame.authenticate(username, password)) {
             clearLoginFields();
-            frame.mainNav(); // Navigate to main application
+            SQLite sql = new SQLite();
+            frame.mainNav(sql.getUser(username)); // Navigate to main application
         } else {
         // Check if the user is locked out
         ArrayList<User> users = frame.main.sqlite.getUsers();

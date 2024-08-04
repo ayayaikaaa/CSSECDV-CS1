@@ -827,4 +827,21 @@ public boolean checkEmail(String email) {
         }
         return user;
     }
+
+    public void updateRole(String username, int newRole) {
+        String sql = "UPDATE users SET Role = ? WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setInt(1, newRole);
+            pstmt.setString(2, username);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

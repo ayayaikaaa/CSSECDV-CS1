@@ -26,6 +26,9 @@ public class ClientHome extends javax.swing.JPanel {
     public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
     
+    public final int ROLE = 2;
+    public String userName;
+    
     private CardLayout contentView = new CardLayout();
     
     public ClientHome() {
@@ -47,13 +50,17 @@ public class ClientHome extends javax.swing.JPanel {
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
+        usersBtn.setVisible(false);
 //        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
     
     public void showPnl(String panelName){
         contentView.show(Content, panelName);
+    }
+    
+    public void setUser(String userName){
+        this.userName = userName;
     }
 
     /**
@@ -171,6 +178,7 @@ public class ClientHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.black);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtProduct");
+        mgmtProduct.setPrivileges(this.userName, this.ROLE);
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
@@ -180,6 +188,7 @@ public class ClientHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.red);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtHistory");
+        mgmtHistory.setPrivileges(this.userName, this.ROLE);
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed

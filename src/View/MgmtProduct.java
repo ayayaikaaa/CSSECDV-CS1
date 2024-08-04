@@ -7,7 +7,11 @@ package View;
 
 import Controller.SQLite;
 import Model.Product;
+import Model.User;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -21,6 +25,8 @@ public class MgmtProduct extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public int role;
+    public String userName;
     
     public MgmtProduct(SQLite sqlite) {
         initComponents();
@@ -57,6 +63,35 @@ public class MgmtProduct extends javax.swing.JPanel {
         component.setBackground(new java.awt.Color(240, 240, 240));
         component.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         component.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), text, javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+    }
+    
+    /** ! TODO !
+     * Controls the user privileges 
+     * - which functions are available & restricted
+     * - helps to manage history logs on purchase
+     * 
+     * @param userName
+     * @param role 1 - Locked/Disabled, 2 - client, 3 - staff, 4 - manager,  5 - admin
+     */
+    public void setPrivileges(String userName, int role) {
+        this.role = role;
+        this.userName = userName;
+        
+        switch(this.role) {
+            case 2:
+                addBtn.setVisible(false);
+                editBtn.setVisible(false);
+                deleteBtn.setVisible(false);
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            default:
+                
+        }
     }
     
     /**
@@ -175,17 +210,50 @@ public class MgmtProduct extends javax.swing.JPanel {
 
     private void purchaseBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_purchaseBtnActionPerformed
         if(table.getSelectedRow() >= 0){
-            JTextField stockFld = new JTextField("0");
+            int productStock = Integer.parseInt(tableModel.getValueAt(table.getSelectedRow(), 1).toString());
+            String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+            //Product selectedProduct = sqlite.getProduct(productName);
+            
+            JTextField stockFld = new JTextField(Integer.toString(productStock));
             designer(stockFld, "PRODUCT STOCK");
 
             Object[] message = {
-                "How many " + tableModel.getValueAt(table.getSelectedRow(), 0) + " do you want to purchase?", stockFld
+                "How many " + productName + " do you want to purchase?", stockFld
             };
 
             int result = JOptionPane.showConfirmDialog(null, message, "PURCHASE PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(stockFld.getText());
+                System.out.println("Input: " + stockFld.getText());
+                
+                // Regex - Limit purchase amount to 99 max
+                String regex = "^[1-9][0-9]{0,2}$";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(stockFld.getText());
+                boolean validPurchase = matcher.find();
+                
+                if (validPurchase) {
+                    int purchaseAmt = Integer.parseInt(stockFld.getText());
+                    
+                    if (productStock - purchaseAmt >= 0) {
+                        // Deduct stock in DB
+                        sqlite.purchaseProduct(productName, purchaseAmt);
+                        // Update history in DB
+                        sqlite.addHistory(this.userName, productName, purchaseAmt, new Timestamp(System.currentTimeMillis()).toString());
+                        System.out.println("Purchased!");
+                        // reload
+                        init();
+                        
+                        JOptionPane.showMessageDialog(this, "Purchased!", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        System.out.println("Purchase unsuccessful...");
+                        JOptionPane.showMessageDialog(this, "Purchase unsuccessful", "Purchase Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    
+                } else {
+                    System.out.println("Invalid Purchase Request.");
+                    JOptionPane.showMessageDialog(this, "Invalid Purchase Request.", "Purchase Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_purchaseBtnActionPerformed

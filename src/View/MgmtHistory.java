@@ -21,6 +21,8 @@ public class MgmtHistory extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public int role;
+    public String userName;
     
     public MgmtHistory(SQLite sqlite) {
         initComponents();
@@ -66,6 +68,31 @@ public class MgmtHistory extends javax.swing.JPanel {
         component.setBackground(new java.awt.Color(240, 240, 240));
         component.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         component.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), text, javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
+    }
+    
+    /** ! TODO !
+     * Controls the user privileges 
+     * - which functions are available & restricted
+     * 
+     * @param userName
+     * @param role 1 - Locked/Disabled, 2 - client, 3 - staff, 4 - manager,  5 - admin
+     */
+    public void setPrivileges(String userName, int role){
+        this.role = role;
+        this.userName = userName;
+        
+        switch(this.role) {
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            default:
+                
+        }
     }
     
     /**

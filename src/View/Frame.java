@@ -265,7 +265,12 @@ public class Frame extends javax.swing.JFrame {
                 System.out.println("Welcome Client!");
                 clientHomePnl.showPnl("home");
                 contentView.show(Content, "clientHomePnl");
-                // <Place logic & necessary user privileges here>
+                //
+                adminBtn.setVisible(false);
+                managerBtn.setVisible(false);
+                staffBtn.setVisible(false);
+                
+                clientHomePnl.setUser(currentUser.getUsername());
                 break;
             case 3:
                 System.out.println("Welcome Staff!");

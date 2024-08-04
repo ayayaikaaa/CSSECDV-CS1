@@ -1,6 +1,7 @@
 package View;
 
 import Controller.Main;
+import Model.User;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -217,6 +218,9 @@ public class Frame extends javax.swing.JFrame {
     private CardLayout contentView = new CardLayout();
     private CardLayout frameView = new CardLayout();
     
+    // Stores the currently logged user
+    private User currentUser;
+    
     public void init(Main controller){
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setTitle("CSSECDV - SECURITY Svcs");
@@ -250,8 +254,37 @@ public class Frame extends javax.swing.JFrame {
         this.setVisible(true);
     }
     
-    public void mainNav(){
+    public void mainNav(User user){
         frameView.show(Container, "homePnl");
+        
+        currentUser = user;
+        
+        // Check current logged user privileges
+        switch(currentUser.getRole()) {
+            case 2:
+                System.out.println("Welcome Client!");
+                clientHomePnl.showPnl("home");
+                contentView.show(Content, "clientHomePnl");
+                // <Place logic & necessary user privileges here>
+                break;
+            case 3:
+                System.out.println("Welcome Staff!");
+                staffHomePnl.showPnl("home");
+                contentView.show(Content, "staffHomePnl");
+                break;
+            case 4:
+                System.out.println("Welcome Manager!");
+                managerHomePnl.showPnl("home");
+                contentView.show(Content, "managerHomePnl");
+                break;
+            case 5:
+                System.out.println("Welcome Admin!");
+                adminHomePnl.showPnl("home");
+                contentView.show(Content, "adminHomePnl");
+                break;
+            default:
+                System.out.println("Invalid User. Disabled.");
+        }
     }
     
     public void loginNav(){

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -81,17 +82,26 @@ public class MgmtHistory extends javax.swing.JPanel {
         this.role = role;
         this.userName = userName;
         
-        switch(this.role) {
-            case 2:
+        switch (this.role) {
+            case 2: // Client
+                searchBtn.setVisible(false);
+                reloadBtn.setVisible(false);
                 break;
-            case 3:
+            case 3: // Staff
+                searchBtn.setVisible(false);
+                reloadBtn.setVisible(true);
                 break;
-            case 4:
+            case 4: // Manager
+                searchBtn.setVisible(true);
+                reloadBtn.setVisible(true);
                 break;
-            case 5:
+            case 5: // Admin
+                searchBtn.setVisible(true);
+                reloadBtn.setVisible(true);
                 break;
             default:
-                
+                searchBtn.setVisible(false);
+                reloadBtn.setVisible(false);
         }
     }
     
@@ -196,6 +206,14 @@ public class MgmtHistory extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "SEARCH HISTORY", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
+            String searchText = searchFld.getText().trim();
+            
+            // Input Validation
+            if (!searchText.matches("[a-zA-Z0-9]*")) {
+                JOptionPane.showMessageDialog(null, "Search input must be alphanumeric.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
 //          CLEAR TABLE
             for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
                 tableModel.removeRow(0);

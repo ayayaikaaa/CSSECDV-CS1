@@ -218,26 +218,23 @@ public class SQLite {
     }
     
     public void addLogs(String event, String username, String desc, String timestamp) {
-        String sql = "INSERT INTO logs(event,username,desc,timestamp) VALUES('" + event + "','" + username + "','" + desc + "','" + timestamp + "')";
+        String sql = "INSERT INTO logs(event,username,desc,timestamp) VALUES(?,?,?,?)";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, event);
+            pstmt.setString(2, username);
+            pstmt.setString(3, desc);
+            pstmt.setString(4, timestamp);
+
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             System.out.print(ex);
         }
     }
-    
-    public void addProduct(String name, int stock, double price) {
-        String sql = "INSERT INTO product(name,stock,price) VALUES('" + name + "','" + stock + "','" + price + "')";
-        
-        try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement()){
-            stmt.execute(sql);
-        } catch (Exception ex) {
-            System.out.print(ex);
-        }
-    }
+
 public void resetPassword(String email, String newPassword) {
     // SQL to update password based on email
     String sqlUpdatePassword = "UPDATE users SET password = ? WHERE email = ?";

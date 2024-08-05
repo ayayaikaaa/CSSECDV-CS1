@@ -6,6 +6,9 @@ import Model.Logs;
 import Model.Product;
 import Model.User;
 import Utility.EncryptionTool;
+
+import javax.swing.*;
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -884,6 +887,76 @@ public void editKey(int userId, String key, String iv) {
             sqlite.editKey(userId, key, iv);
         } catch (Exception ex) {
             System.out.print(ex);
+        }
+    }
+
+    public void addProduct(String name, int stock, float price, Component component){
+        String sql = "INSERT INTO product (name, stock, price) VALUES (?, ?, ?);";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, name);
+            pstmt.setInt(2, stock);
+            pstmt.setFloat(3, price);
+
+            pstmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(component, "Product added", "", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    public void editProduct(String name, int stock, float price, Component component, int id){
+        String sql = "UPDATE product SET name = ?, stock = ?, price = ? WHERE id = ?;";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, name);
+            pstmt.setInt(2, stock);
+            pstmt.setFloat(3, price);
+            pstmt.setFloat(4, id);
+
+            pstmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(component, "Product edited", "", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    public int getProductID(String name){
+        String sql = "SELECT id FROM product WHERE name='" + name + "';";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)){
+
+            return Integer.parseInt(rs.getString("id"));
+
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+        return -1;
+    }
+
+    public void deleteProduct(String name) {
+        String sql = "DELETE FROM product WHERE name = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -277,6 +277,11 @@ public class Frame extends javax.swing.JFrame {
                 System.out.println("Welcome Staff!");
                 staffHomePnl.showPnl("home");
                 contentView.show(Content, "staffHomePnl");
+
+                clientBtn.setVisible(false);
+                managerBtn.setVisible(false);
+                staffBtn.setVisible(true);
+                adminBtn.setVisible(false);
                 break;
             case 4:
                 System.out.println("Welcome Manager!");

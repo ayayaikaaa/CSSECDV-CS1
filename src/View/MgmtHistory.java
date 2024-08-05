@@ -63,6 +63,31 @@ public class MgmtHistory extends javax.swing.JPanel {
         }
     }
     
+    /** Method Overload of init().
+     *  Filters the history according to the passed userName.
+     * 
+     * @param userName
+     */
+    public void init(String userName){
+        for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
+            tableModel.removeRow(0);
+        }
+        ArrayList<History> history = sqlite.getHistory();
+        for(int nCtr = 0; nCtr < history.size(); nCtr++){
+            Product product = sqlite.getProduct(history.get(nCtr).getName());
+                if (history.get(nCtr).getUsername().equals(this.userName)){
+                    tableModel.addRow(new Object[]{
+                        history.get(nCtr).getUsername(), 
+                        history.get(nCtr).getName(), 
+                        history.get(nCtr).getStock(), 
+                        product.getPrice(), 
+                        product.getPrice() * history.get(nCtr).getStock(), 
+                        history.get(nCtr).getTimestamp()
+                });
+            }
+        }
+    }
+    
     public void designer(JTextField component, String text){
         component.setSize(70, 600);
         component.setFont(new java.awt.Font("Tahoma", 0, 18));
@@ -86,6 +111,7 @@ public class MgmtHistory extends javax.swing.JPanel {
             case 2: // Client
                 searchBtn.setVisible(false);
                 reloadBtn.setVisible(false);
+                init(this.userName);
                 break;
             case 3: // Staff
                 searchBtn.setVisible(false);

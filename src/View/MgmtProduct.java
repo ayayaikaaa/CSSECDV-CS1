@@ -8,6 +8,8 @@ package View;
 import Controller.SQLite;
 import Model.Product;
 import Model.User;
+
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -247,12 +249,12 @@ public class MgmtProduct extends javax.swing.JPanel {
                         JOptionPane.showMessageDialog(this, "Purchased!", "", JOptionPane.INFORMATION_MESSAGE);
                     } else {
                         System.out.println("Purchase unsuccessful...");
-                        JOptionPane.showMessageDialog(this, "Purchase unsuccessful", "Purchase Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Purchase amount is greater than current stock", "Purchase Error", JOptionPane.ERROR_MESSAGE);
                     }
                     
                 } else {
                     System.out.println("Invalid Purchase Request.");
-                    JOptionPane.showMessageDialog(this, "Invalid Purchase Request.", "Purchase Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Only integers greater than 0 are allowed", "Purchase Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
@@ -274,9 +276,38 @@ public class MgmtProduct extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "ADD PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
-            System.out.println(nameFld.getText());
-            System.out.println(stockFld.getText());
-            System.out.println(priceFld.getText());
+            //System.out.println(nameFld.getText());
+            //System.out.println(stockFld.getText());
+            //System.out.println(priceFld.getText());
+
+            // Regex - Limit purchase amount to 99 max
+            String regex = "^[a-zA-Z0-9].{3,63}$";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(nameFld.getText());
+            boolean validProduct = matcher.find();
+
+            // Regex - Limit purchase amount to 99 max
+            String regex2 = "^\\d+$";
+            Pattern pattern2 = Pattern.compile(regex2);
+            Matcher matcher2 = pattern2.matcher(stockFld.getText());
+            boolean validStock = matcher2.find();
+
+            // Regex - Limit purchase amount to 99 max
+            String regex3 = "^\\d+([.]\\d{1,2})?$";
+            Pattern pattern3 = Pattern.compile(regex3);
+            Matcher matcher3 = pattern3.matcher(priceFld.getText());
+            boolean validPrice = matcher3.find();
+
+                if (validProduct == true && validStock == true && validPrice == true) {
+                    sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()), this);
+                    init();
+                } else if (validProduct == false) {
+                    JOptionPane.showMessageDialog(this, "Invalid product name\nOnly alphanumeric characters are allowed\nMinimum of 4 and maximum of 64 characters", "", JOptionPane.INFORMATION_MESSAGE);
+                } else if (validStock == false) {
+                    JOptionPane.showMessageDialog(this, "Invalid stock amount, only integer values allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid price, only integer or floating point with maximum of 2 decimal places allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                }
         }
     }//GEN-LAST:event_addBtnActionPerformed
 
@@ -294,12 +325,43 @@ public class MgmtProduct extends javax.swing.JPanel {
                 "Edit Product Details:", nameFld, stockFld, priceFld
             };
 
+            int id = sqlite.getProductID(nameFld.getText());
+
             int result = JOptionPane.showConfirmDialog(null, message, "EDIT PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(nameFld.getText());
-                System.out.println(stockFld.getText());
-                System.out.println(priceFld.getText());
+                //System.out.println(nameFld.getText());
+                //System.out.println(stockFld.getText());
+                //System.out.println(priceFld.getText());
+
+                // Regex - Limit purchase amount to 99 max
+                String regex = "^[a-zA-Z0-9].{3,63}$";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(nameFld.getText());
+                boolean validProduct = matcher.find();
+
+                // Regex - Limit purchase amount to 99 max
+                String regex2 = "^\\d+$";
+                Pattern pattern2 = Pattern.compile(regex2);
+                Matcher matcher2 = pattern2.matcher(stockFld.getText());
+                boolean validStock = matcher2.find();
+
+                // Regex - Limit purchase amount to 99 max
+                String regex3 = "^\\d+([.]\\d{1,2})?$";
+                Pattern pattern3 = Pattern.compile(regex3);
+                Matcher matcher3 = pattern3.matcher(priceFld.getText());
+                boolean validPrice = matcher3.find();
+
+                if (validProduct == true && validStock == true && validPrice == true) {
+                    sqlite.editProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()), this, id);
+                    init();
+                } else if (validProduct == false) {
+                    JOptionPane.showMessageDialog(this, "Invalid product name\nOnly alphanumeric characters are allowed\nMinimum of 4 and maximum of 64 characters", "", JOptionPane.INFORMATION_MESSAGE);
+                } else if (validStock == false) {
+                    JOptionPane.showMessageDialog(this, "Invalid stock amount, only integer values allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid price, only integer or floating point with maximum of 2 decimal places allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed
@@ -309,7 +371,10 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE PRODUCT", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                sqlite.deleteProduct(tableModel.getValueAt(table.getSelectedRow(), 0).toString());
+                init();
+                JOptionPane.showMessageDialog(this, "Product Deleted", "", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed

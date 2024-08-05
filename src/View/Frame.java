@@ -269,6 +269,7 @@ public class Frame extends javax.swing.JFrame {
                 adminBtn.setVisible(false);
                 managerBtn.setVisible(false);
                 staffBtn.setVisible(false);
+                clientBtn.setVisible(true);
                 
                 clientHomePnl.setUser(currentUser.getUsername());
                 break;
@@ -286,6 +287,13 @@ public class Frame extends javax.swing.JFrame {
                 System.out.println("Welcome Admin!");
                 adminHomePnl.showPnl("home");
                 contentView.show(Content, "adminHomePnl");
+
+                clientBtn.setVisible(false);
+                managerBtn.setVisible(false);
+                staffBtn.setVisible(false);
+                adminBtn.setVisible(true);
+
+                adminHomePnl.setUser(currentUser.getUsername());
                 break;
             default:
                 System.out.println("Invalid User. Disabled.");
@@ -330,6 +338,10 @@ public class Frame extends javax.swing.JFrame {
     
     public boolean authenticate(String username, String password) {
         return main.sqlite.authenticateUser(username, password);
+    }
+
+    public void logout(){
+        frameView.show(Container, "loginPnl");
     }
 
     public boolean check(String email) {

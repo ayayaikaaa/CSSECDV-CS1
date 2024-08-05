@@ -92,6 +92,7 @@ public class EmailForgot extends javax.swing.JPanel {
 
         verifyBtn.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         verifyBtn.setText("VERIFY");
+        verifyBtn.setEnabled(false);
         verifyBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 verifyBtnActionPerformed(evt);
@@ -215,7 +216,7 @@ public class EmailForgot extends javax.swing.JPanel {
     private void emailFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_emailFldKeyReleased
         String email = emailFld.getText();
         if (!email.equals("")) {
-            if (isValidEmail(email) && !usernameFld.getText().equalsIgnoreCase("admin") && !usernameFld.getText().equalsIgnoreCase("manager")) {
+            if (isValidEmail(email) && !usernameFld.getText().equalsIgnoreCase("admin") && !usernameFld.getText().equalsIgnoreCase("manager") && !usernameFld.getText().equals("")) {
                 validationLabel.setText(""); // Clear any validation message
                 verifyBtn.setEnabled(true);
                 otpBtn.setEnabled(true); // Enable the submit button
@@ -235,7 +236,7 @@ public class EmailForgot extends javax.swing.JPanel {
 
     private void usernameFldKeyRelease(java.awt.event.KeyEvent evt){
         String email = emailFld.getText();
-        if(usernameFld.getText().equalsIgnoreCase("admin") || usernameFld.getText().equalsIgnoreCase("manager") || email.equals("")){
+        if(usernameFld.getText().equalsIgnoreCase("admin") || usernameFld.getText().equalsIgnoreCase("manager") || email.equals("") || usernameFld.getText().equals("")){
             validationLabel.setText("Invalid Credentials"); // Display validation message
             validationLabel.setForeground(Color.RED);
             verifyBtn.setEnabled(false);

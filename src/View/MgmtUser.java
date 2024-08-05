@@ -8,6 +8,8 @@ package View;
 import Controller.SQLite;
 import Model.User;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -189,11 +191,14 @@ public class MgmtUser extends javax.swing.JPanel {
                 "EDIT USER ROLE", JOptionPane.QUESTION_MESSAGE, null, options, options[(int)tableModel.getValueAt(table.getSelectedRow(), 2) - 1]);
             
             if(result != null){
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 //System.out.println(result);
-                sqlite.updateRole(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), Character.getNumericValue(result.charAt(0)));
+                sqlite.updateRole(username, Character.getNumericValue(result.charAt(0)));
+                init();
+                JOptionPane.showMessageDialog(this, "Role edited!", "", JOptionPane.INFORMATION_MESSAGE);
             }else{
-                System.out.println("NO USER SELECTED");
+                JOptionPane.showMessageDialog(this, "Action cancelled" , "", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }//GEN-LAST:event_editRoleBtnActionPerformed
@@ -203,7 +208,10 @@ public class MgmtUser extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                sqlite.deleteUser(tableModel.getValueAt(table.getSelectedRow(), 0).toString());
+                init();
+                JOptionPane.showMessageDialog(this, "User deleted!", "", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
@@ -215,10 +223,19 @@ public class MgmtUser extends javax.swing.JPanel {
                 state = "unlock";
             }
             
-            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
+            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "LOCK/UNLOCK USER", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                if(state.compareTo("lock") == 0){
+                    sqlite.updateLock(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), 1);
+                    init();
+                    JOptionPane.showMessageDialog(this, "User locked", "", JOptionPane.INFORMATION_MESSAGE);
+                }else{
+                    sqlite.updateLock(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), 0);
+                    init();
+                    JOptionPane.showMessageDialog(this, "User unlocked", "", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_lockBtnActionPerformed
@@ -235,10 +252,66 @@ public class MgmtUser extends javax.swing.JPanel {
             };
 
             int result = JOptionPane.showConfirmDialog(null, message, "CHANGE PASSWORD", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+
+            int strength = 0;
+            String hint = "";
+
+            String lengthRegex = "^.{12,64}$";
+            String digitRegex = ".*[0-9].*";
+            String lowercaseRegex = ".*[a-z].*";
+            String uppercaseRegex = ".*[A-Z].*";
+            String specialCharRegex = ".*[^a-zA-Z0-9].*";
+
+            Pattern lengthPattern = Pattern.compile(lengthRegex);
+            Pattern digitPattern = Pattern.compile(digitRegex);
+            Pattern lowercasePattern = Pattern.compile(lowercaseRegex);
+            Pattern uppercasePattern = Pattern.compile(uppercaseRegex);
+            Pattern specialCharPattern = Pattern.compile(specialCharRegex);
+
+            Matcher lengthMatcher = lengthPattern.matcher(password.getText());
+            Matcher digitMatcher = digitPattern.matcher(password.getText());
+            Matcher lowercaseMatcher = lowercasePattern.matcher(password.getText());
+            Matcher uppercaseMatcher = uppercasePattern.matcher(password.getText());
+            Matcher specialCharMatcher = specialCharPattern.matcher(password.getText());
+
+            if (digitMatcher.find()) {
+                strength++;
+            }else
+                hint = "Password must have at least 1 numerical digit";
+            if (lowercaseMatcher.find()) {
+                strength++;
+            }else
+                hint = "Password must have at least 1 lowercase letter";
+            if (uppercaseMatcher.find()) {
+                strength++;
+            }else
+                hint = "Password must have at least 1 uppercase letter";
+            if (specialCharMatcher.find()) {
+                strength++;
+            }else
+                hint = "Password must have at least 1 special character";
+            if (lengthMatcher.matches()) {
+                strength++;
+            }else
+                hint = "Password must be at least 12 and maximum of 64 characters";
+
+            int validConfpass = password.getText().compareTo(confpass.getText());
+
+            //System.out.println(strength);
             
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(password.getText());
-                System.out.println(confpass.getText());
+                if(strength == 5 && validConfpass == 0){
+                    //System.out.println(password.getText());
+                    //System.out.println(confpass.getText());
+                    String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                    sqlite.adminChangePassword(username, password.getText());
+                    init();
+                    JOptionPane.showMessageDialog(this, "Password successfully changed", "", JOptionPane.INFORMATION_MESSAGE);
+                }else if(strength != 5){
+                    JOptionPane.showMessageDialog(this, hint, "", JOptionPane.INFORMATION_MESSAGE);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Both passwords do not match", "", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
         }
     }//GEN-LAST:event_chgpassBtnActionPerformed

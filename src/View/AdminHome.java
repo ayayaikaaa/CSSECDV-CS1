@@ -25,6 +25,9 @@ public class AdminHome extends javax.swing.JPanel {
     public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
+
+    public final int ROLE = 5;
+    public String userName;
     
     private CardLayout contentView = new CardLayout();
     
@@ -54,6 +57,10 @@ public class AdminHome extends javax.swing.JPanel {
     
     public void showPnl(String panelName){
         contentView.show(Content, panelName);
+    }
+
+    public void setUser(String userName){
+        this.userName = userName;
     }
 
     /**
@@ -171,6 +178,7 @@ public class AdminHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.black);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtProduct");
+        mgmtProduct.setPrivileges(this.userName, this.ROLE);
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed

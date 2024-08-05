@@ -842,7 +842,105 @@ public void editKey(int userId, String key, String iv) {
     }
     
     public void purchaseProduct(String name, int amount) {
-        String sql = "UPDATE product SET stock = stock -" + amount + " WHERE name = ?";
-        executeUpdateWithRetry(sql, name);
+        String sql = "UPDATE product SET stock = stock - ? WHERE name = ?";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setInt(1, amount);
+            pstmt.setString(2, name);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void deleteUser(String username) {
+        String sql = "DELETE FROM users WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void updateLock(String username, int state) {
+        String sql = "UPDATE users SET locked = ? WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setInt(1, state);
+            pstmt.setString(2, username);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void adminChangePassword(String username, String newPassword) {
+        // SQL to update password based on email
+        String sqlUpdatePassword = "UPDATE users SET password = ? WHERE username = ?";
+        String sql = "SELECT * FROM users WHERE username = ?";
+        String encryptedPass = "";
+        String key = "";
+        String iv = "";
+        int userId = -1;
+
+        try {
+            EncryptionTool encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
+            encryptedPass = encryption.encryptMessage(newPassword); // Encrypt the new password
+            key = encryption.getKeyString(); // Get encryption key (if needed)
+            iv = encryption.getIvString(); // Get initialization vector (if needed)
+        } catch (Exception ex) {
+            System.out.print(ex); // Handle encryption exceptions (you might want to log or throw)
+        }
+
+        try (Connection conn = DriverManager.getConnection(driverURL)) {
+
+            try (PreparedStatement pstmtSelect = conn.prepareStatement(sql)) {
+                pstmtSelect.setString(1, username);
+                try (ResultSet rs = pstmtSelect.executeQuery()) {
+                    if (rs.next()) {
+                        userId = rs.getInt("id");
+                    } else {
+                        throw new SQLException("No user found with username: " + username);
+                    }
+                }
+            }
+
+
+            // Set parameters for the prepared statement
+            try (PreparedStatement pstmtUpdate = conn.prepareStatement(sqlUpdatePassword)) {
+                pstmtUpdate.setString(1, encryptedPass); // Set encrypted password
+                pstmtUpdate.setString(2, username); // Set username
+
+                int rowsUpdated = pstmtUpdate.executeUpdate(); // Execute the update
+
+                if (rowsUpdated > 0) {
+                    System.out.println("Password updated successfully for user: " + username);
+                } else {
+                    throw new SQLException("Password update failed for user: " + username);
+                }
+            }
+
+            System.out.println("userid: " + userId + " key: " + key + " iv: " + iv);
+
+            SQLite sqlite = new SQLite();
+            sqlite.editKey(userId, key, iv);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
     }
 }

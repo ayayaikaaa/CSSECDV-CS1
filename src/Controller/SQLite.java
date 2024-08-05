@@ -1,11 +1,11 @@
 package Controller;
 
 import Model.History;
-import Model.Keys;
+//import Model.Keys;
 import Model.Logs;
 import Model.Product;
 import Model.User;
-import Utility.EncryptionTool;
+import Utility.EncryptionToolV2;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,7 +24,8 @@ public class SQLite {
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
-    public EncryptionTool encryption;
+    //public EncryptionTool encryption;
+    public EncryptionToolV2 encryption;
     
     public void createNewDatabase() {
         try (Connection conn = DriverManager.getConnection(driverURL)) {
@@ -240,16 +241,12 @@ public void resetPassword(String email, String newPassword) {
     String sqlUpdatePassword = "UPDATE users SET password = ? WHERE email = ?";
     String sqlSelectUserIdAndUsername = "SELECT id, username FROM users WHERE email = ?";
     String encryptedPass = "";
-    String key = "";
-    String iv = "";
     int userId = -1;
     String username = "";
 
     try {
-        EncryptionTool encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
-        encryptedPass = encryption.encryptMessage(newPassword); // Encrypt the new password
-        key = encryption.getKeyString(); // Get encryption key (if needed)
-        iv = encryption.getIvString(); // Get initialization vector (if needed)
+        EncryptionToolV2 encryption = new EncryptionToolV2(); // Create an instance of your EncryptionTool
+        encryptedPass = encryption.hashToBase64(encryption.hash(newPassword)); // Encrypt the new password
     } catch (Exception ex) {
         System.out.print(ex); // Handle encryption exceptions (you might want to log or throw)
     }
@@ -288,37 +285,37 @@ public void resetPassword(String email, String newPassword) {
             }
         }
 
-        System.out.println("userid: " + userId + " key: " + key + " iv: " + iv);
+        System.out.println("userid: " + userId);
 
         SQLite sqlite = new SQLite();
-        sqlite.editKey(userId, key, iv);
+        //sqlite.editKey(userId, key, iv);
     } catch (Exception ex) {
         System.out.print(ex);
     }
 }
 
-public void editKey(int userId, String key, String iv) {
-    String sql = "UPDATE keys SET key = ?, iv = ? WHERE userId = ?";
-
-    try (Connection conn = DriverManager.getConnection(driverURL);
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        
-        pstmt.setString(1, key);
-        pstmt.setString(2, iv);
-        pstmt.setInt(3, userId);
-        
-        int rowsUpdated = pstmt.executeUpdate();
-        
-        if (rowsUpdated > 0) {
-            System.out.println("Keys updated successfully for userId: " + userId);
-        } else {
-            System.out.println("No keys found for userId: " + userId);
-        }
-        
-    } catch (Exception ex) {
-        System.out.print(ex);
-    }
-}
+//public void editKey(int userId, String key, String iv) {
+//    String sql = "UPDATE keys SET key = ?, iv = ? WHERE userId = ?";
+//
+//    try (Connection conn = DriverManager.getConnection(driverURL);
+//         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//        
+//        pstmt.setString(1, key);
+//        pstmt.setString(2, iv);
+//        pstmt.setInt(3, userId);
+//        
+//        int rowsUpdated = pstmt.executeUpdate();
+//        
+//        if (rowsUpdated > 0) {
+//            System.out.println("Keys updated successfully for userId: " + userId);
+//        } else {
+//            System.out.println("No keys found for userId: " + userId);
+//        }
+//        
+//    } catch (Exception ex) {
+//        System.out.print(ex);
+//    }
+//}
 
 
     
@@ -329,10 +326,8 @@ public void editKey(int userId, String key, String iv) {
         String key = "";
         String iv = "";
         try {
-            encryption = new EncryptionTool();
-            encryptedPass = encryption.encryptMessage(password);
-            key = encryption.getKeyString();
-            iv = encryption.getIvString();
+            encryption = new EncryptionToolV2();
+            encryptedPass = encryption.hashToBase64(encryption.hash(password));
         } catch (Exception ex) {
             System.out.print(ex);
         }
@@ -368,10 +363,8 @@ public void editKey(int userId, String key, String iv) {
         String key = "";
         String iv = "";
         try {
-            encryption = new EncryptionTool();
-            encryptedPass = encryption.encryptMessage(password);
-            key = encryption.getKeyString();
-            iv = encryption.getIvString();
+            encryption = new EncryptionToolV2();
+            encryptedPass = encryption.hashToBase64(encryption.hash(password));
         } catch (Exception ex) {
             System.out.print(ex);
         }
@@ -607,12 +600,8 @@ public void editKey(int userId, String key, String iv) {
             ArrayList<User> users = getUsers();
             for (User user : users) {
                 if (user.getUsername().equals(username)) {
-                    encryption = new EncryptionTool();
-                    int userId = user.getId();
-                    encryption.setKey(this.findKey(userId));
-                    encryption.setIv(this.findKeyIV(userId));
-                    String decryptedPassword = encryption.decryptMessage(user.getPassword());
-                    if (decryptedPassword.equals(password)) {
+                    encryption = new EncryptionToolV2();
+                    if (encryption.verify(password, encryption.base64ToHash(user.getPassword()))) {
                         resetLoginAttempts(username);
                         return true;
                     } else {
@@ -642,25 +631,25 @@ public void editKey(int userId, String key, String iv) {
     }
 
 
-    public ArrayList<Keys> getKeys(){
-        String sql = "SELECT id, userId, key, iv FROM keys";
-        ArrayList<Keys> keys = new ArrayList<Keys>();
-        
-        try (Connection conn = DriverManager.getConnection(driverURL);
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)){
-            
-            while (rs.next()) {
-                keys.add(new Keys(rs.getInt("id"),
-                                  rs.getInt("userId"),
-                                  rs.getString("key"),
-                                  rs.getString("iv")));
-            }
-        } catch (Exception ex) {
-            System.out.print(ex);
-        }
-        return keys;
-    }
+//    public ArrayList<Keys> getKeys(){
+//        String sql = "SELECT id, userId, key, iv FROM keys";
+//        ArrayList<Keys> keys = new ArrayList<Keys>();
+//        
+//        try (Connection conn = DriverManager.getConnection(driverURL);
+//            Statement stmt = conn.createStatement();
+//            ResultSet rs = stmt.executeQuery(sql)){
+//            
+//            while (rs.next()) {
+//                keys.add(new Keys(rs.getInt("id"),
+//                                  rs.getInt("userId"),
+//                                  rs.getString("key"),
+//                                  rs.getString("iv")));
+//            }
+//        } catch (Exception ex) {
+//            System.out.print(ex);
+//        }
+//        return keys;
+//    }
     
     public Product getProduct(String name){
         String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";
@@ -837,15 +826,11 @@ public void editKey(int userId, String key, String iv) {
         String sqlUpdatePassword = "UPDATE users SET password = ? WHERE username = ?";
         String sql = "SELECT * FROM users WHERE username = ?";
         String encryptedPass = "";
-        String key = "";
-        String iv = "";
         int userId = -1;
 
         try {
-            EncryptionTool encryption = new EncryptionTool(); // Create an instance of your EncryptionTool
-            encryptedPass = encryption.encryptMessage(newPassword); // Encrypt the new password
-            key = encryption.getKeyString(); // Get encryption key (if needed)
-            iv = encryption.getIvString(); // Get initialization vector (if needed)
+            EncryptionToolV2 encryption = new EncryptionToolV2(); // Create an instance of your EncryptionTool
+            encryptedPass = encryption.hashToBase64(encryption.hash(newPassword)); // Encrypt the new password
         } catch (Exception ex) {
             System.out.print(ex); // Handle encryption exceptions (you might want to log or throw)
         }
@@ -878,10 +863,10 @@ public void editKey(int userId, String key, String iv) {
                 }
             }
 
-            System.out.println("userid: " + userId + " key: " + key + " iv: " + iv);
+            System.out.println("userid: " + userId);
 
             SQLite sqlite = new SQLite();
-            sqlite.editKey(userId, key, iv);
+            //sqlite.editKey(userId, key, iv);
         } catch (Exception ex) {
             System.out.print(ex);
         }

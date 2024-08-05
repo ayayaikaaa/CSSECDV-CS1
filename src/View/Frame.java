@@ -282,11 +282,20 @@ public class Frame extends javax.swing.JFrame {
                 managerBtn.setVisible(false);
                 staffBtn.setVisible(true);
                 adminBtn.setVisible(false);
+
+                staffHomePnl.setUser(currentUser.getUsername());
                 break;
             case 4:
                 System.out.println("Welcome Manager!");
                 managerHomePnl.showPnl("home");
                 contentView.show(Content, "managerHomePnl");
+
+                clientBtn.setVisible(false);
+                managerBtn.setVisible(true);
+                staffBtn.setVisible(false);
+                adminBtn.setVisible(false);
+
+                managerHomePnl.setUser(currentUser.getUsername());
                 break;
             case 5:
                 System.out.println("Welcome Admin!");

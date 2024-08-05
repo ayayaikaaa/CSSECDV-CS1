@@ -7,6 +7,7 @@ import Model.User;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
@@ -52,6 +53,10 @@ public class MgmtProduct extends javax.swing.JPanel {
                 products.get(nCtr).getStock(), 
                 products.get(nCtr).getPrice()});
         }
+    }
+
+    public void setUser(String name){
+        this.userName = name;
     }
     
     public void designer(JTextField component, String text){
@@ -300,7 +305,8 @@ public class MgmtProduct extends javax.swing.JPanel {
                     }else if(Float.parseFloat(priceFld.getText()) > 100000.00){
                         JOptionPane.showMessageDialog(this, "Invalid price, no greater than 100000", "", JOptionPane.INFORMATION_MESSAGE);
                     }else{
-                        sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
+                        sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()), this);
+                        sqlite.addLogs("ADD", this.userName, "Added " + nameFld.getText() + " to products", new Timestamp(new Date().getTime()).toString());
                         init();
                     }}catch (NumberFormatException e){
                         JOptionPane.showMessageDialog(this, "Invalid stock amount, no greater than 1000", "", JOptionPane.INFORMATION_MESSAGE);
@@ -364,6 +370,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                         JOptionPane.showMessageDialog(this, "Invalid price, no greater than 100000", "", JOptionPane.INFORMATION_MESSAGE);
                     }else{
                         sqlite.editProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()), this, id);
+                        sqlite.addLogs("EDIT", this.userName, "Edited product number " + id + " in products", new Timestamp(new Date().getTime()).toString());
                         init();
                     }}catch(NumberFormatException e){
                         JOptionPane.showMessageDialog(this, "Invalid stock amount, no greater than 1000", "", JOptionPane.INFORMATION_MESSAGE);
@@ -386,7 +393,9 @@ public class MgmtProduct extends javax.swing.JPanel {
             
             if (result == JOptionPane.YES_OPTION) {
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
-                sqlite.deleteProduct(tableModel.getValueAt(table.getSelectedRow(), 0).toString());
+                String name = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                sqlite.deleteProduct(name);
+                sqlite.addLogs("DELETE", this.userName, "Deleted " + name + " from products", new Timestamp(new Date().getTime()).toString());
                 init();
                 JOptionPane.showMessageDialog(this, "Product Deleted", "", JOptionPane.INFORMATION_MESSAGE);
             }

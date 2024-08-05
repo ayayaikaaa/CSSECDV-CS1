@@ -7,7 +7,10 @@ package View;
 
 import Controller.SQLite;
 import Model.User;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JComboBox;
@@ -26,6 +29,7 @@ public class MgmtUser extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    public String userName;
     
     public MgmtUser(SQLite sqlite) {
         initComponents();
@@ -55,6 +59,10 @@ public class MgmtUser extends javax.swing.JPanel {
                 users.get(nCtr).getRole(), 
                 users.get(nCtr).getLocked()});
         }
+    }
+
+    public void setUser(String name){
+        this.userName = name;
     }
 
     public void designer(JTextField component, String text){
@@ -195,6 +203,7 @@ public class MgmtUser extends javax.swing.JPanel {
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 //System.out.println(result);
                 sqlite.updateRole(username, Character.getNumericValue(result.charAt(0)));
+                sqlite.addLogs("EDIT", this.userName, "Edited role for " + username, new Timestamp(new Date().getTime()).toString());
                 init();
                 JOptionPane.showMessageDialog(this, "Role edited!", "", JOptionPane.INFORMATION_MESSAGE);
             }else{
@@ -209,7 +218,9 @@ public class MgmtUser extends javax.swing.JPanel {
             
             if (result == JOptionPane.YES_OPTION) {
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
-                sqlite.deleteUser(tableModel.getValueAt(table.getSelectedRow(), 0).toString());
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+                sqlite.deleteUser(username);
+                sqlite.addLogs("DELETE", this.userName, "Deleted user " + username, new Timestamp(new Date().getTime()).toString());
                 init();
                 JOptionPane.showMessageDialog(this, "User deleted!", "", JOptionPane.INFORMATION_MESSAGE);
             }
@@ -226,13 +237,16 @@ public class MgmtUser extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "LOCK/UNLOCK USER", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
+                String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 if(state.compareTo("lock") == 0){
-                    sqlite.updateLock(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), 1);
+                    sqlite.updateLock(username, 1);
+                    sqlite.addLogs("LOCK/UNLOCK", this.userName, "User " + username + " locked", new Timestamp(new Date().getTime()).toString());
                     init();
                     JOptionPane.showMessageDialog(this, "User locked", "", JOptionPane.INFORMATION_MESSAGE);
                 }else{
                     sqlite.updateLock(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), 0);
+                    sqlite.addLogs("LOCK/UNLOCK", this.userName, "User " + username + " unlocked", new Timestamp(new Date().getTime()).toString());
                     init();
                     JOptionPane.showMessageDialog(this, "User unlocked", "", JOptionPane.INFORMATION_MESSAGE);
                 }
@@ -305,6 +319,7 @@ public class MgmtUser extends javax.swing.JPanel {
                     //System.out.println(confpass.getText());
                     String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
                     sqlite.adminChangePassword(username, password.getText());
+                    sqlite.addLogs("PASSWORD", this.userName, "User " + username + " password changed", new Timestamp(new Date().getTime()).toString());
                     init();
                     JOptionPane.showMessageDialog(this, "Password successfully changed", "", JOptionPane.INFORMATION_MESSAGE);
                 }else if(strength != 5){

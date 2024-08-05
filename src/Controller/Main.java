@@ -55,11 +55,11 @@ public class Main {
         sqlite.addLogs("NOTICE", "admin", "User creation successful", new Timestamp(new Date().getTime()).toString());
         sqlite.addLogs("NOTICE", "manager", "User creation successful", new Timestamp(new Date().getTime()).toString());
         sqlite.addLogs("NOTICE", "admin", "User creation successful", new Timestamp(new Date().getTime()).toString());
-        
+
         // Add sample product
-        sqlite.addProduct("Antivirus", 5, 500.0);
-        sqlite.addProduct("Firewall", 3, 1000.0);
-        sqlite.addProduct("Scanner", 10, 100.0);
+        //sqlite.addProduct("Antivirus", 5, 500.00f, frame);
+        //sqlite.addProduct("Firewall", 3, 1000.00f, this);
+        //sqlite.addProduct("Scanner", 10, 100.00f, this);
 
         // Add sample users
         sqlite.addUser("admin", "1234" , 5, "cssecdevadm@gmail.com");

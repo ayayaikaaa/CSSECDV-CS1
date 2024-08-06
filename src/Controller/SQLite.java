@@ -22,7 +22,8 @@ import java.util.ArrayList;
 public class SQLite {
     private final int maxAttempts = 3;
     private final int lockoutDuration = 60000; // 1 minute in milliseconds
-    private int disabled = 0;
+    private final int disabledCountThreshold = 2;
+
 
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -101,6 +102,7 @@ public class SQLite {
                 + " role INTEGER DEFAULT 2,\n"
                 + " locked INTEGER DEFAULT 0,\n"
                 + " lockout_time INTEGER DEFAULT 0,\n"
+                + " disabled_count INTEGER DEFAULT 0,\n" 
                 + " email TEXT UNIQUE\n"
                 + ");";
 
@@ -479,8 +481,8 @@ public class SQLite {
         String sql = "INSERT INTO login_attempts(username, attempt_time) VALUES(?, ?)";
         executeUpdateWithRetry(sql, username, System.currentTimeMillis());
     }
-
-    private int getLockoutCount(String username) {
+    
+    public int getLockoutCount(String username) {
         String sql = "SELECT COUNT(*) as count FROM login_attempts WHERE username = ? AND attempt_time > ?";
         int count = 0;
         try (Connection conn = DriverManager.getConnection(driverURL);
@@ -497,27 +499,51 @@ public class SQLite {
         return count;
     }
 
+    private void updateDisabledCount(String username, int increment) {
+        String sql = "UPDATE users SET disabled_count = disabled_count + ? WHERE username = ?";
+        executeUpdateWithRetry(sql, increment, username);
+    }
+
     private void lockUser(String username) {
         int lockoutCount = getLockoutCount(username);
-
-        if (disabled > 1) {
-            // Permanently lock the user by setting role to 1
-            String sqlUpdateRole = "UPDATE users SET role = 1 WHERE username = ?";
-            executeUpdateWithRetry(sqlUpdateRole, username);
-            System.out.println("User " + username + " has been permanently locked.");
-        } else {
-            // Temporarily lock the user
-            System.out.println("Disable: " + disabled + ";" + "LockoutCount: " + lockoutCount);
-            if(lockoutCount % 3 == 0){
-                disabled++;
+        int disabledCount = getDisabledCount(username);
+        
+        if(lockoutCount >=maxAttempts){
+            if (disabledCount < disabledCountThreshold) {
+                disabledCount++;
+                updateDisabledCount(username, 1); // Increment the disabledCount
             }
-            System.out.println("Disable: " + disabled + ";" + "LockoutCount: " + lockoutCount);
-            String sqlUpdateLock = "UPDATE users SET locked = 1, lockout_time = ? WHERE username = ?";
-            executeUpdateWithRetry(sqlUpdateLock, System.currentTimeMillis(), username);
-            System.out.println("User " + username + " has been temporarily locked.");
+            if (disabledCount >= disabledCountThreshold) {
+                String sqlUpdateRole = "UPDATE users SET role = 1 WHERE username = ?";
+                executeUpdateWithRetry(sqlUpdateRole, username);
+                System.out.println("User " + username + " has been permanently locked.");
+            } else {
+                if (lockoutCount >= maxAttempts) {
+                    String sqlUpdateLock = "UPDATE users SET locked = 1, lockout_time = ? WHERE username = ?";
+                    executeUpdateWithRetry(sqlUpdateLock, System.currentTimeMillis(), username);
+                    System.out.println("User " + username + " has been temporarily locked.");
+                    System.out.println("Disable: " + disabledCount + ";" + "LockoutCount: " + lockoutCount);
+                }
+            }
         }
     }
 
+    private int getDisabledCount(String username) {
+        String sql = "SELECT disabled_count FROM users WHERE username = ?";
+        int count = 0;
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("disabled_count");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return count;
+    }
+    
     private void unlockUser(String username) {
         String sql = "UPDATE users SET locked = 0 WHERE username = ?";
         executeUpdateWithRetry(sql, username);
@@ -562,6 +588,7 @@ public class SQLite {
                 int locked = rs.getInt("locked");
                 long lockoutTime = rs.getLong("lockout_time");
                 int role = rs.getInt("role");
+
                 if (role == 1) {
                     return true; // Permanently locked
                 }
@@ -577,10 +604,9 @@ public class SQLite {
         }
         return false;
     }
-
+    
     public boolean authenticateUser(String username, String password) {
         try {
-
             if (isUserLocked(username)) {
                 System.out.println("User is currently locked.");
                 return false;
@@ -598,13 +624,17 @@ public class SQLite {
                     String convert = encryption.base64ToHash(storedHashedPassword);
                     if (encryption.verify(password, convert)) {
                         resetLoginAttempts(username);
+                        updateDisabledCount(username, -getDisabledCount(username)); // Reset disabled count
                         return true;
                     } else {
                         recordLoginAttempt(username);
-                        System.out.println(getLockoutCount(username));
-                        if (getLockoutCount(username) >= maxAttempts) {
+
+                        int lockoutCount = getLockoutCount(username);
+                        System.out.println(lockoutCount);
+                        if (lockoutCount >= maxAttempts) {
                             lockUser(username);
                         }
+
                         return false;
                     }
                 }

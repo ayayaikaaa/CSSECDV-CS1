@@ -139,10 +139,38 @@ public class Login extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+//        String username = EMAIL.getText();
+//        String password = new String(passwordFld.getText());
+//
+//        if (frame.authenticate(username, password)) {
+//            clearLoginFields();
+//            SQLite sql = new SQLite();
+//            sql.addLogs("LOGIN", username, "Successfully logged in", new Timestamp(new Date().getTime()).toString());
+//            frame.mainNav(sql.getUser(username)); // Navigate to main application
+//        } else {
+//            // Check if the user is locked out
+//            ArrayList<User> users = frame.main.sqlite.getUsers();
+//            for (User user : users) {
+//                if (user.getUsername().equals(username)) {
+//                    if (user.getRole() == 1) {
+//                        JOptionPane.showMessageDialog(this, "Account disabled. Contact admin for support.", "Account Disabled", JOptionPane.ERROR_MESSAGE);
+//                        return;
+//                    } else if (user.getLocked() == 1) {
+//                        JOptionPane.showMessageDialog(this, "Account temporarily locked due to multiple incorrect login attempts. Try again later.", "Login Error", JOptionPane.ERROR_MESSAGE);
+//                        return;
+//                    }
+//                }
+//            }
+//            // Handle incorrect login credentials
+//            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+//        }
+
         String username = EMAIL.getText();
         String password = new String(passwordFld.getText());
 
-        if (frame.authenticate(username, password)) {
+        boolean isAuthenticated = frame.authenticate(username, password);
+
+        if (isAuthenticated) {
             clearLoginFields();
             SQLite sql = new SQLite();
             sql.addLogs("LOGIN", username, "Successfully logged in", new Timestamp(new Date().getTime()).toString());
@@ -156,7 +184,12 @@ public class Login extends javax.swing.JPanel {
                         JOptionPane.showMessageDialog(this, "Account disabled. Contact admin for support.", "Account Disabled", JOptionPane.ERROR_MESSAGE);
                         return;
                     } else if (user.getLocked() == 1) {
-                        JOptionPane.showMessageDialog(this, "Account temporarily locked due to multiple incorrect login attempts. Try again later.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                        int lockoutCount = frame.main.sqlite.getLockoutCount(username);
+                        if (lockoutCount >= 3) {
+                            JOptionPane.showMessageDialog(this, "Account temporarily locked due to multiple incorrect login attempts. Try again later.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Incorrect password. Try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                        }
                         return;
                     }
                 }
@@ -164,6 +197,7 @@ public class Login extends javax.swing.JPanel {
             // Handle incorrect login credentials
             JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

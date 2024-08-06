@@ -206,19 +206,19 @@ public class MgmtLogs extends javax.swing.JPanel {
                 if (result == JOptionPane.OK_OPTION) {
                     //System.out.println(id);
                     // Regex - Limit purchase amount to 99 max
-                    String regex = "^[a-zA-Z0-9]{3,12}$";
+                    String regex = "^[a-zA-Z0-9]{4,12}$";
                     Pattern pattern = Pattern.compile(regex);
                     Matcher matcher = pattern.matcher(eventFld.getText());
                     boolean validEvent = matcher.find();
 
                     // Regex - Limit purchase amount to 99 max
-                    String regex2 = "^[a-zA-Z0-9]{3,16}$";
+                    String regex2 = "^[a-zA-Z0-9]{4,16}$";
                     Pattern pattern2 = Pattern.compile(regex2);
                     Matcher matcher2 = pattern2.matcher(usernameFld.getText());
                     boolean validUsername = matcher2.find();
 
                     // Regex - Limit purchase amount to 99 max
-                    String regex3 = "^[a-zA-Z0-9 ]{0,63}$";
+                    String regex3 = "^[a-zA-Z0-9 ]{1,63}$";
                     Pattern pattern3 = Pattern.compile(regex3);
                     Matcher matcher3 = pattern3.matcher(descFld.getText());
                     boolean validDesc = matcher3.find();

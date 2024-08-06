@@ -222,7 +222,7 @@ public class EmailForgot extends javax.swing.JPanel {
     private void emailFldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_emailFldKeyReleased
         String email = emailFld.getText();
         if (!email.equals("")) {
-            if (isValidEmail(email) && !usernameFld.getText().equalsIgnoreCase("admin") && !usernameFld.getText().equalsIgnoreCase("manager") && !usernameFld.getText().equals("")) {
+            if (isValidEmail(email) && !usernameFld.getText().equals("")) {
                 validationLabel.setText(""); // Clear any validation message
                 verifyBtn.setEnabled(true);
                 otpBtn.setEnabled(true); // Enable the submit button
@@ -268,13 +268,16 @@ public class EmailForgot extends javax.swing.JPanel {
 
     private void otpBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_otpBtnActionPerformed
         String email = emailFld.getText();
+        String username = usernameFld.getText();
         if (isValidEmail(email)) {
+            System.out.println("Valid email");
             generatedOTP = generateOTP(email);
-            if(frame.check(email)){
+            if(matchEmail(emailFld.getText().toLowerCase(), usernameFld.getText().toLowerCase()) ){
                 sendOTPEmail(email, generatedOTP);
                 JOptionPane.showMessageDialog(this, "If email is valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
             }
             else{
+                System.out.println("match fail");
                 JOptionPane.showMessageDialog(this, "If valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
             }
                 

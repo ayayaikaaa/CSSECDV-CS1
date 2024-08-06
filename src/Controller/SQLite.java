@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class SQLite {
     private final int maxAttempts = 3;
     private final int lockoutDuration = 60000; // 1 minute in milliseconds
+    private int disabled = 0;
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -603,7 +604,7 @@ public void resetPassword(String email, String newPassword) {
         try {
 
             if (isUserLocked(username)) {
-                //System.out.println("User is currently locked.");
+                System.out.println("User is currently locked.");
                 return false;
             }
 
@@ -614,20 +615,17 @@ public void resetPassword(String email, String newPassword) {
                         System.out.println("User account is disabled.");
                         return false;
                     }
-                    encryption = new EncryptionTool();
-                    int userId = user.getId();
-                    encryption.setKey(this.findKey(userId));
-                    encryption.setIv(this.findKeyIV(userId));
-                    String decryptedPassword = encryption.decryptMessage(user.getPassword());
-                    if (decryptedPassword.equals(password)) {
+                    encryption = new EncryptionToolV2();
+                    String storedHashedPassword = user.getPassword();
+                    String convert = encryption.base64ToHash(storedHashedPassword);
+                    if (encryption.verify(password, convert)) {
                         resetLoginAttempts(username);
                         return true;
                     } else {
                         recordLoginAttempt(username);
-                        System.out.println(getLockoutCount(username));
                         if (getLockoutCount(username) >= maxAttempts) {
                             lockUser(username);
-                        }
+                        }   
                         return false;
                     }
                 }

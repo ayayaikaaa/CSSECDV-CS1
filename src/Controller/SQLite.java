@@ -922,7 +922,7 @@ public class SQLite {
         }
     }
     
-    public void addProduct(String name, int stock, float price) {
+    public void addProductTest(String name, int stock, float price) {
         String sql = "INSERT INTO product (name, stock, price) VALUES (?, ?, ?);";
         try (Connection conn = DriverManager.getConnection(driverURL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {

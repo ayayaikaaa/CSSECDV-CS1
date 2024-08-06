@@ -27,6 +27,8 @@ public class ManagerHome extends javax.swing.JPanel {
     public MgmtUser mgmtUser;
 
     public String userName;
+
+    private static final int ROLE =  4;
     
     private CardLayout contentView = new CardLayout();
     
@@ -177,6 +179,7 @@ public class ManagerHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.black);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtProduct");
+        mgmtProduct.setPrivileges(this.userName, this.ROLE);
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
@@ -186,6 +189,7 @@ public class ManagerHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.red);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtHistory");
+        mgmtHistory.setPrivileges(this.userName, this.ROLE);
     }//GEN-LAST:event_historyBtnActionPerformed
 
     private void logsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logsBtnActionPerformed

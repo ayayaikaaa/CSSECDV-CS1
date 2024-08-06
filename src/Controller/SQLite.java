@@ -635,6 +635,11 @@ public class SQLite {
                 System.out.println("User is currently locked.");
                 return false;
             }
+            
+            if (!findUser(username)) {
+                System.out.println("User invalid.");
+                return false;
+            }         
 
             User user = getUser(username);
                     if (user.getRole() == 1) {

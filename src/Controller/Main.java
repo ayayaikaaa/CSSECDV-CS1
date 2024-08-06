@@ -39,7 +39,7 @@ public class Main {
         sqlite.dropLoginAttemptsTable();
         
         // Create users table if not exist
-        sqlite.createHistoryTable();
+        sqlite.createHistoryTable();;
         sqlite.createLogsTable();
         sqlite.createProductTable();
         sqlite.createUserTable();

@@ -36,6 +36,7 @@ public class Main {
         sqlite.dropProductTable();
         sqlite.dropUserTable();
         sqlite.dropKeysTable();
+        sqlite.dropLoginAttemptsTable();
         
         // Create users table if not exist
         sqlite.createHistoryTable();
@@ -46,9 +47,9 @@ public class Main {
         sqlite.createLoginAttemptsTable();
         
         // Add sample history
-//        sqlite.addHistory("admin", "Antivirus", 1, "2019-04-03 14:30:00.000");
-//        sqlite.addHistory("manager", "Firewall", 1, "2019-04-03 14:30:01.000");
-//        sqlite.addHistory("staff", "Scanner", 1, "2019-04-03 14:30:02.000");
+        sqlite.addHistory("admin", "Antivirus", 1, "2019-04-03 14:30:00.000");
+        sqlite.addHistory("manager", "Firewall", 1, "2019-04-03 14:30:01.000");
+        sqlite.addHistory("staff", "Scanner", 1, "2019-04-03 14:30:02.000");
         
         // Add sample logs
         sqlite.addLogs("NOTICE", "admin", "User creation successful", new Timestamp(new Date().getTime()).toString());
@@ -56,15 +57,15 @@ public class Main {
         sqlite.addLogs("NOTICE", "admin", "User creation successful", new Timestamp(new Date().getTime()).toString());
 
         // Add sample product
-//        sqlite.addProduct("Antivirus", 5, 500.00f, frame);
-//        sqlite.addProduct("Firewall", 3, 1000.00f, this);
-//        sqlite.addProduct("Scanner", 10, 100.00f, this);
+        sqlite.addProduct("Antivirus", 5, 500.00f);
+        sqlite.addProduct("Firewall", 3, 1000.00f);
+        sqlite.addProduct("Scanner", 10, 100.00f);
 
         // Add sample users
-        sqlite.addUser("admin", "1234" , 5, "cssecdevadm@gmail.com");
-        sqlite.addUser("staff", "1234", 3, "cssecdevmanager@gmail.com");
-//        sqlite.addUser("staff", "qwerty1234", 3);
-        sqlite.addUser("client1", "qwerty1234", 2, "matthew_adrian_u_chua@dlsu.edu.ph");
+        sqlite.addUser("admin", "5" , 5, "cssecdevadm@gmail.com");
+        sqlite.addUser("manager", "4", 4, "cssecdevmanager@gmail.com");
+        sqlite.addUser("staff", "3", 3, "aika_manuel@dlsu.edu.ph");
+        sqlite.addUser("client", "2", 2, "aika2499@gmail.com");
         
 
 //        // Get histories
@@ -88,23 +89,23 @@ public class Main {
 //        }
 //        
         // Get products
-        ArrayList<Product> products = sqlite.getProduct();
-        for(int nCtr = 0; nCtr < products.size(); nCtr++){
-            System.out.println("===== Product " + products.get(nCtr).getId() + " =====");
-            System.out.println(" Name: " + products.get(nCtr).getName());
-            System.out.println(" Stock: " + products.get(nCtr).getStock());
-            System.out.println(" Price: " + products.get(nCtr).getPrice());
-        }
+//        ArrayList<Product> products = sqlite.getProduct();
+//        for(int nCtr = 0; nCtr < products.size(); nCtr++){
+//            System.out.println("===== Product " + products.get(nCtr).getId() + " =====");
+//            System.out.println(" Name: " + products.get(nCtr).getName());
+//            System.out.println(" Stock: " + products.get(nCtr).getStock());
+//            System.out.println(" Price: " + products.get(nCtr).getPrice());
+//        }
 
         // Get users
-        ArrayList<User> users = sqlite.getUsers();
-        for(int nCtr = 0; nCtr < users.size(); nCtr++){
-            System.out.println("===== User " + users.get(nCtr).getId() + " =====");
-            System.out.println(" Username: " + users.get(nCtr).getUsername());
-            System.out.println(" Password: " + users.get(nCtr).getPassword());
-            System.out.println(" Role: " + users.get(nCtr).getRole());
-            System.out.println(" Locked: " + users.get(nCtr).getLocked());
-        }
+//        ArrayList<User> users = sqlite.getUsers();
+//        for(int nCtr = 0; nCtr < users.size(); nCtr++){
+//            System.out.println("===== User " + users.get(nCtr).getId() + " =====");
+//            System.out.println(" Username: " + users.get(nCtr).getUsername());
+//            System.out.println(" Password: " + users.get(nCtr).getPassword());
+//            System.out.println(" Role: " + users.get(nCtr).getRole());
+//            System.out.println(" Locked: " + users.get(nCtr).getLocked());
+//        }
         
         // Get keys
 //        ArrayList<Keys> keys = sqlite.getKeys();
@@ -116,24 +117,24 @@ public class Main {
 //        }
 
        // Debug Encryption/Decryption
-        try {
-            String username = "Johnny";
-            String password = "Bravo97!";
-            
-            System.out.println("==== Debugging ====");
-            System.out.println(" Username: " + username);
-            System.out.println(" Password: " + password);
-            
-            EncryptionToolV2 encryption = new EncryptionToolV2();
-            String encryptedPass = encryption.hash(password);
-            System.out.println("Encrypted Password: " + encryptedPass);
-            System.out.println("Base64 Password: " + encryption.hashToBase64(encryptedPass));
-            System.out.println("Reversal: " + encryption.base64ToHash(encryption.hashToBase64(encryptedPass)));
-            System.out.println("Verified: " + encryption.verify("Bravo97!", encryptedPass));
-        } catch (Exception e) {
-            System.out.println(e);
-            System.exit(1);
-        }
+//        try {
+//            String username = "Johnny";
+//            String password = "Bravo97!";
+//            
+//            System.out.println("==== Debugging ====");
+//            System.out.println(" Username: " + username);
+//            System.out.println(" Password: " + password);
+//            
+//            EncryptionToolV2 encryption = new EncryptionToolV2();
+//            String encryptedPass = encryption.hash(password);
+//            System.out.println("Encrypted Password: " + encryptedPass);
+//            System.out.println("Base64 Password: " + encryption.hashToBase64(encryptedPass));
+//            System.out.println("Reversal: " + encryption.base64ToHash(encryption.hashToBase64(encryptedPass)));
+//            System.out.println("Verified: " + encryption.verify("Bravo97!", encryptedPass));
+//        } catch (Exception e) {
+//            System.out.println(e);
+//            System.exit(1);
+//        }
         
         // Initialize User Interface
         Frame frame = new Frame();

@@ -137,8 +137,8 @@ public class SQLite {
         String sql = "CREATE TABLE IF NOT EXISTS login_attempts (\n"
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                 + " username TEXT NOT NULL,\n"
-                + " attempt_time INTEGER NOT NULL\n"
-                + " disableCounter INTEGER NOT NULL\n"
+                + " attempt_time INTEGER NOT NULL,\n"
+                + " disableCounter INTEGER\n"
                 + ");";
 
         //executeUpdate(sql);
@@ -202,6 +202,18 @@ public class SQLite {
 
     public void dropKeysTable() {
         String sql = "DROP TABLE IF EXISTS keys;";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table keys in database.db dropped.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void dropLoginAttemptsTable() {
+        String sql = "DROP TABLE IF EXISTS login_attempts;";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {

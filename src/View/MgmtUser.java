@@ -240,12 +240,12 @@ public class MgmtUser extends javax.swing.JPanel {
                 String username = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
                 //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 if(state.compareTo("lock") == 0){
-                    sqlite.updateLock(username, 1);
+                    sqlite.lockUserAdmin(username);
                     sqlite.addLogs("LOCK/UNLOCK", this.userName, "User " + username + " locked", new Timestamp(new Date().getTime()).toString());
                     init();
                     JOptionPane.showMessageDialog(this, "User locked", "", JOptionPane.INFORMATION_MESSAGE);
                 }else{
-                    sqlite.updateLock(tableModel.getValueAt(table.getSelectedRow(), 0).toString(), 0);
+                    sqlite.unlockUser(username);
                     sqlite.addLogs("LOCK/UNLOCK", this.userName, "User " + username + " unlocked", new Timestamp(new Date().getTime()).toString());
                     init();
                     JOptionPane.showMessageDialog(this, "User unlocked", "", JOptionPane.INFORMATION_MESSAGE);

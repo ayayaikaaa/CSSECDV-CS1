@@ -137,8 +137,8 @@ public class SQLite {
         String sql = "CREATE TABLE IF NOT EXISTS login_attempts (\n"
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                 + " username TEXT NOT NULL,\n"
-                + " attempt_time INTEGER NOT NULL\n"
-                + " disableCounter INTEGER NOT NULL\n"
+                + " attempt_time INTEGER NOT NULL,\n"
+                + " disableCounter INTEGER\n"
                 + ");";
 
         //executeUpdate(sql);
@@ -202,6 +202,18 @@ public class SQLite {
 
     public void dropKeysTable() {
         String sql = "DROP TABLE IF EXISTS keys;";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+            System.out.println("Table keys in database.db dropped.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void dropLoginAttemptsTable() {
+        String sql = "DROP TABLE IF EXISTS login_attempts;";
 
         try (Connection conn = DriverManager.getConnection(driverURL);
              Statement stmt = conn.createStatement()) {
@@ -623,6 +635,11 @@ public class SQLite {
                 System.out.println("User is currently locked.");
                 return false;
             }
+            
+            if (!findUser(username)) {
+                System.out.println("User invalid.");
+                return false;
+            }         
 
             User user = getUser(username);
                     if (user.getRole() == 1) {
@@ -902,6 +919,26 @@ public class SQLite {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    public void addProduct(String name, int stock, float price) {
+        String sql = "INSERT INTO product (name, stock, price) VALUES (?, ?, ?);";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, name);
+            pstmt.setInt(2, stock);
+            pstmt.setFloat(3, price);
+
+            pstmt.executeUpdate();
+
+            //JOptionPane.showMessageDialog(component, "Product added", "", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            //JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

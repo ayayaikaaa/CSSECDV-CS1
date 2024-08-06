@@ -20,6 +20,7 @@ public class Login extends javax.swing.JPanel {
     public void clearLoginFields() {
         EMAIL.setText(null);
         passwordFld.setText(null);
+        loginBtn.setEnabled(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -167,11 +168,17 @@ public class Login extends javax.swing.JPanel {
 
         String username = EMAIL.getText();
         String password = new String(passwordFld.getText());
-
+        
+        // Check if user dne
+        if(!frame.main.sqlite.findUser(username)) {
+            clearLoginFields();
+            JOptionPane.showMessageDialog(this, "Username or password incorrect. Try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         boolean isAuthenticated = frame.authenticate(username, password);
 
         if (isAuthenticated) {
-            clearLoginFields();
             SQLite sql = new SQLite();
             sql.addLogs("LOGIN", username, "Successfully logged in", new Timestamp(new Date().getTime()).toString());
             frame.mainNav(sql.getUser(username)); // Navigate to main application
@@ -180,6 +187,7 @@ public class Login extends javax.swing.JPanel {
             User user = frame.main.sqlite.getUser(username);
                     if (user.getRole() == 1) {
                         JOptionPane.showMessageDialog(this, "Account disabled. Contact admin for support.", "Account Disabled", JOptionPane.ERROR_MESSAGE);
+                        clearLoginFields();
                         return;
                     } else if (user.getLocked() == 1) {
                         int lockoutCount = frame.main.sqlite.getLockoutCount(username);
@@ -188,12 +196,13 @@ public class Login extends javax.swing.JPanel {
                         } else {
                             JOptionPane.showMessageDialog(this, "Username or password incorrect. Try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
                         }
+                        clearLoginFields();
                         return;
                     }
             // Handle incorrect login credentials
             JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
         }
-
+        clearLoginFields();
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

@@ -177,23 +177,19 @@ public class Login extends javax.swing.JPanel {
             frame.mainNav(sql.getUser(username)); // Navigate to main application
         } else {
             // Check if the user is locked out
-            ArrayList<User> users = frame.main.sqlite.getUsers();
-            for (User user : users) {
-                if (user.getUsername().equals(username)) {
+            User user = frame.main.sqlite.getUser(username);
                     if (user.getRole() == 1) {
                         JOptionPane.showMessageDialog(this, "Account disabled. Contact admin for support.", "Account Disabled", JOptionPane.ERROR_MESSAGE);
                         return;
                     } else if (user.getLocked() == 1) {
                         int lockoutCount = frame.main.sqlite.getLockoutCount(username);
-                        if (lockoutCount >= 3) {
+                        if (user.getLocked() == 1) {
                             JOptionPane.showMessageDialog(this, "Account temporarily locked due to multiple incorrect login attempts. Try again later.", "Login Error", JOptionPane.ERROR_MESSAGE);
                         } else {
-                            JOptionPane.showMessageDialog(this, "Incorrect password. Try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this, "Username or password incorrect. Try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
                         }
                         return;
                     }
-                }
-            }
             // Handle incorrect login credentials
             JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
         }

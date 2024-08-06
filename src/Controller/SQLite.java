@@ -22,7 +22,9 @@ import java.util.ArrayList;
 public class SQLite {
     private final int maxAttempts = 3;
     private final int lockoutDuration = 60000; // 1 minute in milliseconds
+
     private int disabled = 0;
+
 
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -502,7 +504,9 @@ public class SQLite {
         String sql = "INSERT INTO login_attempts(username, attempt_time) VALUES(?, ?)";
         executeUpdateWithRetry(sql, username, System.currentTimeMillis());
     }
+
     
+
     private int getLockoutCount(String username) {
         String sql = "SELECT COUNT(*) as count FROM login_attempts WHERE username = ? AND attempt_time > ?";
         int count = 0;
@@ -517,19 +521,24 @@ public class SQLite {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
     return count;
 }
+
 
     private void lockUser(String username) {
         int lockoutCount = getLockoutCount(username);
 
+
         if (disabled > 1) {
+
             // Permanently lock the user by setting role to 1
             String sqlUpdateRole = "UPDATE users SET role = 1 WHERE username = ?";
             executeUpdateWithRetry(sqlUpdateRole, username);
             System.out.println("User " + username + " has been permanently locked.");
         } else {
             // Temporarily lock the user
+
             System.out.println("Disable: " + disabled + ";" + "LockoutCount: " + lockoutCount);
             if(lockoutCount % 3 == 0){
                 disabled++;
@@ -538,6 +547,7 @@ public class SQLite {
             String sqlUpdateLock = "UPDATE users SET locked = 1, lockout_time = ? WHERE username = ?";
             executeUpdateWithRetry(sqlUpdateLock, System.currentTimeMillis(), username);
             System.out.println("User " + username + " has been temporarily locked.");
+
         }
     }
 
@@ -574,9 +584,11 @@ public class SQLite {
         String sql = "DELETE FROM login_attempts WHERE username = ?";
         executeUpdateWithRetry(sql, username);
     }
+
     
     private boolean isUserLocked(String username) {
         String sql = "SELECT locked, lockout_time, role FROM users WHERE username = ?";
+
         try (Connection conn = DriverManager.getConnection(driverURL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -584,10 +596,12 @@ public class SQLite {
             if (rs.next()) {
                 int locked = rs.getInt("locked");
                 long lockoutTime = rs.getLong("lockout_time");
+
                 int role = rs.getInt("role");
                 if (role == 1) {
                     return true; // Permanently locked
                 }
+
                 if (locked == 1 && System.currentTimeMillis() < lockoutTime + lockoutDuration) {
                     return true;
                 } else if (locked == 1) {
@@ -600,9 +614,11 @@ public class SQLite {
         }
         return false;
     }
+
     
     public boolean authenticateUser(String username, String password) {
         try {
+
 
             if (isUserLocked(username)) {
                 System.out.println("User is currently locked.");
@@ -612,6 +628,7 @@ public class SQLite {
             ArrayList<User> users = getUsers();
             for (User user : users) {
                 if (user.getUsername().equals(username)) {
+
                     if (user.getRole() == 1) {
                         System.out.println("User account is disabled.");
                         return false;
@@ -620,14 +637,17 @@ public class SQLite {
                     String storedHashedPassword = user.getPassword();
                     String convert = encryption.base64ToHash(storedHashedPassword);
                     if (encryption.verify(password, convert)) {
+
                         resetLoginAttempts(username);
                         return true;
                     } else {
                         recordLoginAttempt(username);
+
                         System.out.println(getLockoutCount(username));
                         if (getLockoutCount(username) >= maxAttempts) {
                             lockUser(username);
                         }   
+
                         return false;
                     }
                 }

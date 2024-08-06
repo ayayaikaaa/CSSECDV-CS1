@@ -65,7 +65,6 @@ public class Main {
         sqlite.addUser("staff", "1234", 3, "cssecdevmanager@gmail.com");
 //        sqlite.addUser("staff", "qwerty1234", 3);
         sqlite.addUser("client1", "qwerty1234", 2, "matthew_adrian_u_chua@dlsu.edu.ph");
-//        sqlite.addUser("client2", "qwerty1234", 2);
         
         
 //        // Get histories

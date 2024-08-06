@@ -10,6 +10,10 @@ import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 /**
  *
  * @author Avin
@@ -19,6 +23,9 @@ public class EmailForgot extends javax.swing.JPanel {
     /**
      * Creates new form emailForgot
      */
+    private static Map<String, String> otpMap = new HashMap<>();
+    private static final int EXPIRATION_TIME_MINUTES = 1;
+ 
     private String generatedOTP;
     
     public Frame frame;
@@ -197,13 +204,12 @@ public class EmailForgot extends javax.swing.JPanel {
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
         frame.loginNav();
         clearForgotFields();
-        clearForgotFields();
     }//GEN-LAST:event_backBtnActionPerformed
 
     private void verifyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_verifyBtnActionPerformed
         String enteredOTP = otpFld.getText();
         String email = emailFld.getText();
-        if (enteredOTP.equals(generatedOTP) && matchEmail(emailFld.getText().toLowerCase(), usernameFld.getText().toLowerCase())) {
+        if (validateOTP(enteredOTP, email) && matchEmail(emailFld.getText().toLowerCase(), usernameFld.getText().toLowerCase())) {
             JOptionPane.showMessageDialog(this, "OTP Verified Successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
             clearForgotFields();
             frame.resetNav(email);
@@ -263,7 +269,7 @@ public class EmailForgot extends javax.swing.JPanel {
     private void otpBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_otpBtnActionPerformed
         String email = emailFld.getText();
         if (isValidEmail(email)) {
-            generatedOTP = generateOTP();
+            generatedOTP = generateOTP(email);
             if(frame.check(email)){
                 sendOTPEmail(email, generatedOTP);
                 JOptionPane.showMessageDialog(this, "If email is valid then OTP has been sent to your email.", "OTP Sent", JOptionPane.INFORMATION_MESSAGE);
@@ -275,16 +281,41 @@ public class EmailForgot extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_otpBtnActionPerformed
 
+      public static String generateOTP(String email) {
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000); // Generates a 6-digit OTP
+        String otpString = String.valueOf(otp);
+        otpMap.put(otpString, email); // Store OTP with email
+
+        // Schedule the OTP removal after the expiration time
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                otpMap.remove(otpString);
+            }
+        }, EXPIRATION_TIME_MINUTES * 60 * 1000);
+
+        return otpString;
+    }
+
+
+
+    public static boolean validateOTP(String enteredOTP, String email) {
+        String storedEmail = otpMap.get(enteredOTP);
+        if (storedEmail != null && storedEmail.equals(email)) {
+            otpMap.remove(enteredOTP); 
+            return true;
+        }
+        return false;
+    }
+
     private boolean isValidEmail(String email) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         return email.matches(emailRegex);
     }
     
-    private String generateOTP() {
-        Random random = new Random();
-        int otp = 100000 + random.nextInt(900000); // Generates a 6-digit OTP
-        return String.valueOf(otp);
-    }
+
     private void sendOTPEmail(String to, String otp) {
         final String username = "gcpaps2@gmail.com"; // Your email
         final String password = "zcdanwsymtiqohrk"; // Your email password
@@ -321,8 +352,12 @@ public class EmailForgot extends javax.swing.JPanel {
     private boolean matchEmail(String email, String username){
         try {
             if (this.frame.main.sqlite.getUser(username).getEmail().equals(email)) {
+               
+                System.out.println(this.frame.main.sqlite.getUser(username).getEmail());
                 return true;
             } else {
+
+                System.out.println(this.frame.main.sqlite.getUser(username).getEmail());
                 return false;
             }
         }catch(Exception error){

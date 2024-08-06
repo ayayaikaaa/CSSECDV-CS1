@@ -25,6 +25,8 @@ public class ManagerHome extends javax.swing.JPanel {
     public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
+
+    public String userName;
     
     private CardLayout contentView = new CardLayout();
     
@@ -47,9 +49,13 @@ public class ManagerHome extends javax.swing.JPanel {
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
+        usersBtn.setVisible(false);
 //        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+       logsBtn.setVisible(false);
+    }
+
+    public void setUser(String userName){
+        this.userName = userName;
     }
     
     public void showPnl(String panelName){

@@ -25,6 +25,8 @@ public class StaffHome extends javax.swing.JPanel {
     public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
+
+    public String userName;
     
     private CardLayout contentView = new CardLayout();
     
@@ -47,9 +49,13 @@ public class StaffHome extends javax.swing.JPanel {
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
+        usersBtn.setVisible(false);
 //        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+        logsBtn.setVisible(false);
+    }
+
+    public void setUser(String userName){
+        this.userName = userName;
     }
     
     public void showPnl(String panelName){
@@ -171,6 +177,7 @@ public class StaffHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.black);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtProduct");
+        mgmtUser.setUser(this.userName);
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed

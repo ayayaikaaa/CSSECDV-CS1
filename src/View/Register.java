@@ -2,6 +2,8 @@ package View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Timestamp;
+import java.util.Date;
 
 public class Register extends javax.swing.JPanel {
 
@@ -167,6 +169,7 @@ public class Register extends javax.swing.JPanel {
         if(!frame.main.sqlite.findUser(usernameFld.getText()) && !frame.main.sqlite.checkEmail(emailFld.getText())){
             frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText(), emailFld.getText());
             JOptionPane.showMessageDialog(this, "Registration Successful", "Success", JOptionPane.INFORMATION_MESSAGE);
+            frame.main.sqlite.addLogs("ADD", usernameFld.getText(), "Successfully registered", new Timestamp(new Date().getTime()).toString());
             clearRegisterFields();
             passwordLabel.setText("");
             confpassLabel.setText("");

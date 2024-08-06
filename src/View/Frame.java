@@ -339,6 +339,14 @@ public class Frame extends javax.swing.JFrame {
     public boolean authenticate(String username, String password) {
         return main.sqlite.authenticateUser(username, password);
     }
+    
+//    public boolean disable(String username) {
+//        return main.sqlite.isUserDisabled(username);
+//    }
+//    
+//    public boolean lock(String username) {
+//        return main.sqlite.isUserLocked(username);
+//    }
 
     public void logout(){
         frameView.show(Container, "loginPnl");

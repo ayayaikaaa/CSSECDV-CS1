@@ -904,6 +904,26 @@ public class SQLite {
             JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+    
+    public void addProduct(String name, int stock, float price) {
+        String sql = "INSERT INTO product (name, stock, price) VALUES (?, ?, ?);";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, name);
+            pstmt.setInt(2, stock);
+            pstmt.setFloat(3, price);
+
+            pstmt.executeUpdate();
+
+            //JOptionPane.showMessageDialog(component, "Product added", "", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            //JOptionPane.showMessageDialog(component, "Product name already exists!", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
     public void editProduct(String name, int stock, float price, Component component, int id) {
         String sql = "UPDATE product SET name = ?, stock = ?, price = ? WHERE id = ?;";

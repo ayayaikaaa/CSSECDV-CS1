@@ -345,7 +345,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                 //System.out.println(priceFld.getText());
 
                 // Regex - Limit purchase amount to 99 max
-                String regex = "^[a-zA-Z0-9].{3,63}$";
+                String regex = "^[a-zA-Z0-9 ]{3,63}$";
                 Pattern pattern = Pattern.compile(regex);
                 Matcher matcher = pattern.matcher(nameFld.getText());
                 boolean validProduct = matcher.find();

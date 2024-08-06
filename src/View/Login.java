@@ -138,23 +138,28 @@ public class Login extends javax.swing.JPanel {
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
         String username = EMAIL.getText();
         String password = new String(passwordFld.getText());
-        
+
         if (frame.authenticate(username, password)) {
             clearLoginFields();
             SQLite sql = new SQLite();
             frame.mainNav(sql.getUser(username)); // Navigate to main application
         } else {
-        // Check if the user is locked out
-        ArrayList<User> users = frame.main.sqlite.getUsers();
-        for (User user : users) {
-            if (user.getUsername().equals(username) && user.getLocked() == 1) {
-                JOptionPane.showMessageDialog(this, "3 incorrect login attempts. Try again later", "Login Error", JOptionPane.ERROR_MESSAGE);
-                return;
+            // Check if the user is locked out
+            ArrayList<User> users = frame.main.sqlite.getUsers();
+            for (User user : users) {
+                if (user.getUsername().equals(username)) {
+                    if (user.getRole() == 1) {
+                        JOptionPane.showMessageDialog(this, "Account disabled. Contact admin for support.", "Account Disabled", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    } else if (user.getLocked() == 1) {
+                        JOptionPane.showMessageDialog(this, "Account temporarily locked due to multiple incorrect login attempts. Try again later.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
             }
+            // Handle incorrect login credentials
+            JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
         }
-        // Handle incorrect login credentials
-        JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
-    }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed

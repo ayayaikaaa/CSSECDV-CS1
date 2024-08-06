@@ -21,6 +21,7 @@ import java.util.ArrayList;
 public class SQLite {
     private final int maxAttempts = 3;
     private final int lockoutDuration = 60000; // 1 minute in milliseconds
+    private int disabled = 0;
     
     public int DEBUG_MODE = 0;
     String driverURL = "jdbc:sqlite:" + "database.db";
@@ -520,17 +521,22 @@ public void resetPassword(String email, String newPassword) {
 
     private void lockUser(String username) {
         int lockoutCount = getLockoutCount(username);
-    
-        if (lockoutCount >= 3) {
+
+        if (disabled > 1) {
             // Permanently lock the user by setting role to 1
             String sqlUpdateRole = "UPDATE users SET role = 1 WHERE username = ?";
             executeUpdateWithRetry(sqlUpdateRole, username);
             System.out.println("User " + username + " has been permanently locked.");
         } else {
             // Temporarily lock the user
+            System.out.println("Disable: " + disabled + ";" + "LockoutCount: " + lockoutCount);
+            if(lockoutCount % 3 == 0){
+                disabled++;
+            }
+            System.out.println("Disable: " + disabled + ";" + "LockoutCount: " + lockoutCount);
             String sqlUpdateLock = "UPDATE users SET locked = 1, lockout_time = ? WHERE username = ?";
             executeUpdateWithRetry(sqlUpdateLock, System.currentTimeMillis(), username);
-            System.out.println("User " + username + " has been locked.");
+            System.out.println("User " + username + " has been temporarily locked.");
         }
     }
 
@@ -569,7 +575,7 @@ public void resetPassword(String email, String newPassword) {
     }
     
     private boolean isUserLocked(String username) {
-        String sql = "SELECT locked, lockout_time FROM users WHERE username = ?";
+        String sql = "SELECT locked, lockout_time, role FROM users WHERE username = ?";
         try (Connection conn = DriverManager.getConnection(driverURL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -577,6 +583,10 @@ public void resetPassword(String email, String newPassword) {
             if (rs.next()) {
                 int locked = rs.getInt("locked");
                 long lockoutTime = rs.getLong("lockout_time");
+                int role = rs.getInt("role");
+                if (role == 1) {
+                    return true; // Permanently locked
+                }
                 if (locked == 1 && System.currentTimeMillis() < lockoutTime + lockoutDuration) {
                     return true;
                 } else if (locked == 1) {
@@ -592,6 +602,7 @@ public void resetPassword(String email, String newPassword) {
     
     public boolean authenticateUser(String username, String password) {
         try {
+
             if (isUserLocked(username)) {
                 System.out.println("User is currently locked.");
                 return false;
@@ -600,15 +611,21 @@ public void resetPassword(String email, String newPassword) {
             ArrayList<User> users = getUsers();
             for (User user : users) {
                 if (user.getUsername().equals(username)) {
+                    if (user.getRole() == 1) {
+                        System.out.println("User account is disabled.");
+                        return false;
+                    }
                     encryption = new EncryptionToolV2();
-                    if (encryption.verify(password, encryption.base64ToHash(user.getPassword()))) {
+                    String storedHashedPassword = user.getPassword();
+                    String convert = encryption.base64ToHash(storedHashedPassword);
+                    if (encryption.verify(password, convert)) {
                         resetLoginAttempts(username);
                         return true;
                     } else {
                         recordLoginAttempt(username);
                         if (getLockoutCount(username) >= maxAttempts) {
                             lockUser(username);
-                        }
+                        }   
                         return false;
                     }
                 }

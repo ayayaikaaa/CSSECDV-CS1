@@ -78,6 +78,8 @@ public class MgmtProduct extends javax.swing.JPanel {
     public void setPrivileges(String userName, int role) {
         this.role = role;
         this.userName = userName;
+
+        System.out.println(role);
         
         switch(this.role) {
             case 2:
@@ -86,10 +88,19 @@ public class MgmtProduct extends javax.swing.JPanel {
                 deleteBtn.setVisible(false);
                 break;
             case 3:
+                addBtn.setVisible(true);
+                editBtn.setVisible(true);
+                deleteBtn.setVisible(true);
                 break;
             case 4:
+                addBtn.setVisible(true);
+                editBtn.setVisible(true);
+                deleteBtn.setVisible(true);
                 break;
             case 5:
+                addBtn.setVisible(false);
+                editBtn.setVisible(false);
+                deleteBtn.setVisible(false);
                 break;
             default:
                 

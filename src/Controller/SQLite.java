@@ -22,7 +22,7 @@ import java.util.ArrayList;
 public class SQLite {
     private final int maxAttempts = 3;
     private final int lockoutDuration = 60000; // 1 minute in milliseconds
-    private final int disabledCountThreshold = 2;
+    private final int disabledCountThreshold = 3;
 
 
     public int DEBUG_MODE = 0;
@@ -138,6 +138,7 @@ public class SQLite {
                 + " id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                 + " username TEXT NOT NULL,\n"
                 + " attempt_time INTEGER NOT NULL\n"
+                + " disableCounter INTEGER NOT NULL\n"
                 + ");";
 
         //executeUpdate(sql);
@@ -297,30 +298,6 @@ public class SQLite {
             System.out.print(ex);
         }
     }
-
-//public void editKey(int userId, String key, String iv) {
-//    String sql = "UPDATE keys SET key = ?, iv = ? WHERE userId = ?";
-//
-//    try (Connection conn = DriverManager.getConnection(driverURL);
-//         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//        
-//        pstmt.setString(1, key);
-//        pstmt.setString(2, iv);
-//        pstmt.setInt(3, userId);
-//        
-//        int rowsUpdated = pstmt.executeUpdate();
-//        
-//        if (rowsUpdated > 0) {
-//            System.out.println("Keys updated successfully for userId: " + userId);
-//        } else {
-//            System.out.println("No keys found for userId: " + userId);
-//        }
-//        
-//    } catch (Exception ex) {
-//        System.out.print(ex);
-//    }
-//}
-
 
     public void addUser(String username, String password) {
         String sql = "INSERT INTO users(username,password,email) VALUES(?, ?, NULL)";
@@ -527,16 +504,19 @@ public class SQLite {
         executeUpdateWithRetry(sql, increment, username);
     }
 
-    private void lockUser(String username) {
+    public void lockUser(String username) {
         int lockoutCount = getLockoutCount(username);
         int disabledCount = getDisabledCount(username);
-        
+        System.out.println(lockoutCount >=maxAttempts);
         if(lockoutCount >=maxAttempts){
+            //System.out.println("OKAY");
             if (disabledCount < disabledCountThreshold) {
+                //System.out.println("OKAY2");
                 disabledCount++;
                 updateDisabledCount(username, 1); // Increment the disabledCount
             }
             if (disabledCount >= disabledCountThreshold) {
+                //System.out.println("OKAY3");
                 String sqlUpdateRole = "UPDATE users SET role = 1 WHERE username = ?";
                 executeUpdateWithRetry(sqlUpdateRole, username);
                 System.out.println("User " + username + " has been permanently locked.");
@@ -549,6 +529,12 @@ public class SQLite {
                 }
             }
         }
+    }
+
+    public void lockUserAdmin(String username){
+        String sqlUpdateLock = "UPDATE users SET locked = 1, lockout_time = ? WHERE username = ?";
+        executeUpdateWithRetry(sqlUpdateLock, System.currentTimeMillis(), username);
+        System.out.println("User " + username + " has been temporarily locked.");
     }
 
     private int getDisabledCount(String username) {
@@ -567,9 +553,10 @@ public class SQLite {
         return count;
     }
     
-    private void unlockUser(String username) {
+    public void unlockUser(String username) {
         String sql = "UPDATE users SET locked = 0 WHERE username = ?";
         executeUpdateWithRetry(sql, username);
+        //System.out.println("RESET");
     }
 
     private void executeUpdateWithRetry(String sql, Object... params) {
@@ -599,12 +586,11 @@ public class SQLite {
     private void resetLoginAttempts(String username) {
         String sql = "DELETE FROM login_attempts WHERE username = ?";
         executeUpdateWithRetry(sql, username);
+        unlockUser(username);
     }
 
-    
     private boolean isUserLocked(String username) {
         String sql = "SELECT locked, lockout_time, role FROM users WHERE username = ?";
-
         try (Connection conn = DriverManager.getConnection(driverURL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
@@ -617,11 +603,11 @@ public class SQLite {
                 if (role == 1) {
                     return true; // Permanently locked
                 }
-
                 if (locked == 1 && System.currentTimeMillis() < lockoutTime + lockoutDuration) {
                     return true;
                 } else if (locked == 1) {
-                    unlockUser(username);
+                    //unlockUser(username);
+                    //System.out.println("OKAT");
                     return false;
                 }
             }
@@ -638,10 +624,7 @@ public class SQLite {
                 return false;
             }
 
-            ArrayList<User> users = getUsers();
-            for (User user : users) {
-                if (user.getUsername().equals(username)) {
-
+            User user = getUser(username);
                     if (user.getRole() == 1) {
                         System.out.println("User account is disabled.");
                         return false;
@@ -655,7 +638,7 @@ public class SQLite {
                         return true;
                     } else {
                         recordLoginAttempt(username);
-
+                        unlockUser(username);
                         int lockoutCount = getLockoutCount(username);
                         System.out.println(lockoutCount);
                         if (lockoutCount >= maxAttempts) {
@@ -664,8 +647,6 @@ public class SQLite {
 
                         return false;
                     }
-                }
-            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -682,27 +663,6 @@ public class SQLite {
         }
         return false; // Return false if email not found
     }
-
-
-//    public ArrayList<Keys> getKeys(){
-//        String sql = "SELECT id, userId, key, iv FROM keys";
-//        ArrayList<Keys> keys = new ArrayList<Keys>();
-//        
-//        try (Connection conn = DriverManager.getConnection(driverURL);
-//            Statement stmt = conn.createStatement();
-//            ResultSet rs = stmt.executeQuery(sql)){
-//            
-//            while (rs.next()) {
-//                keys.add(new Keys(rs.getInt("id"),
-//                                  rs.getInt("userId"),
-//                                  rs.getString("key"),
-//                                  rs.getString("iv")));
-//            }
-//        } catch (Exception ex) {
-//            System.out.print(ex);
-//        }
-//        return keys;
-//    }
 
     public Product getProduct(String name) {
         String sql = "SELECT name, stock, price FROM product WHERE name='" + name + "';";

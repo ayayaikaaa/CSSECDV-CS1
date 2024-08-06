@@ -116,6 +116,7 @@ public class MgmtHistory extends javax.swing.JPanel {
             case 3: // Staff
                 searchBtn.setVisible(false);
                 reloadBtn.setVisible(true);
+                init(this.userName);
                 break;
             case 4: // Manager
                 searchBtn.setVisible(true);
@@ -124,6 +125,7 @@ public class MgmtHistory extends javax.swing.JPanel {
             case 5: // Admin
                 searchBtn.setVisible(true);
                 reloadBtn.setVisible(true);
+                init(this.userName);
                 break;
             default:
                 searchBtn.setVisible(false);

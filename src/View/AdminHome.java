@@ -170,6 +170,7 @@ public class AdminHome extends javax.swing.JPanel {
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtUser");
         mgmtUser.setUser(this.userName);
+        mgmtLogs.sqlite.DEBUG_MODE = 0;
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
@@ -181,6 +182,7 @@ public class AdminHome extends javax.swing.JPanel {
         contentView.show(Content, "mgmtProduct");
         mgmtProduct.setPrivileges(this.userName, this.ROLE);
         mgmtProduct.setUser(this.userName);
+        mgmtLogs.sqlite.DEBUG_MODE = 0;
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
@@ -190,6 +192,7 @@ public class AdminHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.red);
         logsBtn.setForeground(Color.black);
         contentView.show(Content, "mgmtHistory");
+        mgmtHistory.setPrivileges(this.userName, this.ROLE);
         mgmtLogs.sqlite.DEBUG_MODE = 0;
     }//GEN-LAST:event_historyBtnActionPerformed
 
@@ -200,6 +203,7 @@ public class AdminHome extends javax.swing.JPanel {
         historyBtn.setForeground(Color.black);
         logsBtn.setForeground(Color.red);
         contentView.show(Content, "mgmtLogs");
+        mgmtLogs.sqlite.DEBUG_MODE = 0;
     }//GEN-LAST:event_logsBtnActionPerformed
     
     

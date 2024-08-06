@@ -66,7 +66,7 @@ public class Main {
 //        sqlite.addUser("staff", "qwerty1234", 3);
         sqlite.addUser("client1", "qwerty1234", 2, "matthew_adrian_u_chua@dlsu.edu.ph");
         
-        
+
 //        // Get histories
 //        ArrayList<History> histories = sqlite.getHistory();
 //        for(int nCtr = 0; nCtr < histories.size(); nCtr++){

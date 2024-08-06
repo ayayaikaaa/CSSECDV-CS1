@@ -242,8 +242,8 @@ public class EmailForgot extends javax.swing.JPanel {
 
     private void usernameFldKeyRelease(java.awt.event.KeyEvent evt){
         String email = emailFld.getText();
-        if(usernameFld.getText().equalsIgnoreCase("admin") || usernameFld.getText().equalsIgnoreCase("manager") || email.equals("") || usernameFld.getText().equals("")){
-            validationLabel.setText("Invalid Credentials"); // Display validation message
+        if(email.equals("") || usernameFld.getText().equals("")){
+            validationLabel.setText("Missing fields"); // Display validation message
             validationLabel.setForeground(Color.RED);
             verifyBtn.setEnabled(false);
             otpBtn.setEnabled(false);

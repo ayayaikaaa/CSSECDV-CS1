@@ -4,7 +4,10 @@ package View;
 import Controller.SQLite;
 import javax.swing.JOptionPane;
 import Model.User;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Login extends javax.swing.JPanel {
 
@@ -142,6 +145,7 @@ public class Login extends javax.swing.JPanel {
         if (frame.authenticate(username, password)) {
             clearLoginFields();
             SQLite sql = new SQLite();
+            sql.addLogs("LOGIN", username, "Successfully logged in", new Timestamp(new Date().getTime()).toString());
             frame.mainNav(sql.getUser(username)); // Navigate to main application
         } else {
         // Check if the user is locked out
@@ -154,6 +158,8 @@ public class Login extends javax.swing.JPanel {
         }
         // Handle incorrect login credentials
         JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Error", JOptionPane.ERROR_MESSAGE);
+        clearLoginFields();
+        loginBtn.setEnabled(false);
     }
     }//GEN-LAST:event_loginBtnActionPerformed
 

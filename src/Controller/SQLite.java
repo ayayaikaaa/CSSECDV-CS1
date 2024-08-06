@@ -941,4 +941,39 @@ public void resetPassword(String email, String newPassword) {
             System.out.println(e.getMessage());
         }
     }
+
+    public void editLogs(String event, String username, String desc, String time, int id){
+        String sql = "UPDATE logs SET event = ?, username = ?, desc = ?, timestamp = ? WHERE id = ?;";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+            pstmt.setString(1, event);
+            pstmt.setString(2, username);
+            pstmt.setString(3, desc);
+            pstmt.setString(4, time);
+            pstmt.setInt(5, id);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void clearLogs(){
+        String sql = "DELETE FROM logs;";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // Set the parameters
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
 }

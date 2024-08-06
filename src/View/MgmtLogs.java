@@ -8,6 +8,10 @@ package View;
 import Controller.SQLite;
 import Model.Logs;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.*;
+import javax.swing.event.*;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -18,7 +22,7 @@ public class MgmtLogs extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
-    
+
     public MgmtLogs(SQLite sqlite) {
         initComponents();
         this.sqlite = sqlite;
@@ -43,8 +47,17 @@ public class MgmtLogs extends javax.swing.JPanel {
                 logs.get(nCtr).getEvent(), 
                 logs.get(nCtr).getUsername(), 
                 logs.get(nCtr).getDesc(), 
-                logs.get(nCtr).getTimestamp()});
+                logs.get(nCtr).getTimestamp(),
+                    logs.get(nCtr).getId()});
         }
+    }
+
+    public void designer(JTextField component, String text){
+        component.setSize(70, 600);
+        component.setFont(new java.awt.Font("Tahoma", 0, 18));
+        component.setBackground(new java.awt.Color(240, 240, 240));
+        component.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        component.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), text, javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12)));
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,17 +76,17 @@ public class MgmtLogs extends javax.swing.JPanel {
         table.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Event", "Username", "Description", "Timestamp"
+                "Event", "Username", "Description", "Timestamp", ""
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -88,6 +101,18 @@ public class MgmtLogs extends javax.swing.JPanel {
             table.getColumnModel().getColumn(1).setPreferredWidth(160);
             table.getColumnModel().getColumn(2).setPreferredWidth(400);
             table.getColumnModel().getColumn(3).setPreferredWidth(240);
+            table.getColumnModel().getColumn(4).setMinWidth(0);
+            table.getColumnModel().getColumn(4).setMaxWidth(0);
+            table.getColumnModel().getColumn(4).setPreferredWidth(0);
+            table.getColumnModel().getColumn(4).setResizable(false);
+            table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    if (!e.getValueIsAdjusting()) {
+                        rowSelected(e);
+                    }
+                }
+            });
         }
 
         clearBtn.setBackground(new java.awt.Color(255, 255, 255));
@@ -135,15 +160,93 @@ public class MgmtLogs extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void clearBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearBtnActionPerformed
-        
+        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear all logs?", "CLEAR LOGS", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+
+        if(result == JOptionPane.OK_OPTION){
+            sqlite.DEBUG_MODE = 0;
+            sqlite.clearLogs();
+            init();
+            JOptionPane.showMessageDialog(this, "All logs cleared", "", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_clearBtnActionPerformed
 
     private void debugBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debugBtnActionPerformed
-        if(sqlite.DEBUG_MODE == 1)
+        if(sqlite.DEBUG_MODE == 1) {
             sqlite.DEBUG_MODE = 0;
-        else
+            JOptionPane.showMessageDialog(this, "Debug mode disabled", "", JOptionPane.INFORMATION_MESSAGE);
+        }
+        else {
             sqlite.DEBUG_MODE = 1;
+            JOptionPane.showMessageDialog(this, "Debug mode enabled", "", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_debugBtnActionPerformed
+
+    private void rowSelected(ListSelectionEvent e){
+        //System.out.println(e);
+        if(table.getSelectedRow() != -1) {
+            if (sqlite.DEBUG_MODE == 1) {
+                JTextField eventFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 0) + "");
+                JTextField usernameFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 1) + "");
+                JTextField descFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 2) + "");
+                JTextField timeFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 3) + "");
+
+                designer(eventFld, "EVENT NAME");
+                designer(usernameFld, "USERNAME");
+                designer(descFld, "DESCRIPTION");
+                designer(timeFld, "TIMESTAMP");
+
+                Object[] message = {
+                        "Edit Product Details:", eventFld, usernameFld, descFld, timeFld
+                };
+
+                int id = Integer.parseInt(tableModel.getValueAt(table.getSelectedRow(), 4).toString());
+
+                int result = JOptionPane.showConfirmDialog(null, message, "EDIT LOGS", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
+
+                if (result == JOptionPane.OK_OPTION) {
+                    //System.out.println(id);
+                    // Regex - Limit purchase amount to 99 max
+                    String regex = "^[a-zA-Z0-9]{3,12}$";
+                    Pattern pattern = Pattern.compile(regex);
+                    Matcher matcher = pattern.matcher(eventFld.getText());
+                    boolean validEvent = matcher.find();
+
+                    // Regex - Limit purchase amount to 99 max
+                    String regex2 = "^[a-zA-Z0-9]{3,16}$";
+                    Pattern pattern2 = Pattern.compile(regex2);
+                    Matcher matcher2 = pattern2.matcher(usernameFld.getText());
+                    boolean validUsername = matcher2.find();
+
+                    // Regex - Limit purchase amount to 99 max
+                    String regex3 = "^[a-zA-Z0-9].{0,63}$";
+                    Pattern pattern3 = Pattern.compile(regex3);
+                    Matcher matcher3 = pattern3.matcher(descFld.getText());
+                    boolean validDesc = matcher3.find();
+
+                    // Regex - Limit purchase amount to 99 max
+                    String regex4 = "^\\d\\d\\d\\d[-]\\d\\d[-]\\d\\d[ ]\\d\\d[:]\\d\\d[:]\\d\\d[.]\\d\\d\\d$";
+                    Pattern pattern4 = Pattern.compile(regex4);
+                    Matcher matcher4 = pattern4.matcher(timeFld.getText());
+                    boolean validTime = matcher4.find();
+
+                    if (validEvent == true && validUsername == true && validDesc == true && validTime == true) {
+                        sqlite.editLogs(eventFld.getText(), usernameFld.getText(), descFld.getText(), timeFld.getText(), id);
+                        table.clearSelection();
+                        init();
+                        JOptionPane.showMessageDialog(this, "Log edited", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (!validEvent) {
+                        JOptionPane.showMessageDialog(this, "Invalid event, only alphanumeric characters of minimum 4 and max of 12 length is allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (!validUsername) {
+                        JOptionPane.showMessageDialog(this, "Invalid username, only alphanumeric characters of minimum 4 and max of 16 length is allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else if (!validDesc) {
+                        JOptionPane.showMessageDialog(this, "Invalid description, only alphanumeric characters of minimum 1 and max of 63 length is allowed", "", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Invalid timestamp, format is:\nYYYY-MM-DD HH:mm:ss.SSS", "", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+            }
+        }
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

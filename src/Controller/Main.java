@@ -57,9 +57,9 @@ public class Main {
         sqlite.addLogs("NOTICE", "admin", "User creation successful", new Timestamp(new Date().getTime()).toString());
 
         // Add sample product
-        sqlite.addProduct("Antivirus", 5, 500.00f);
-        sqlite.addProduct("Firewall", 3, 1000.00f);
-        sqlite.addProduct("Scanner", 10, 100.00f);
+        sqlite.addProductTest("Antivirus", 5, 500.00f);
+        sqlite.addProductTest("Firewall", 3, 1000.00f);
+        sqlite.addProductTest("Scanner", 10, 100.00f);
 
         // Add sample users
         sqlite.addUser("admin", "5" , 5, "cssecdevadm@gmail.com");

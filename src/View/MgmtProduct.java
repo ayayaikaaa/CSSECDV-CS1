@@ -292,19 +292,19 @@ public class MgmtProduct extends javax.swing.JPanel {
             //System.out.println(priceFld.getText());
 
             // Regex - Limit purchase amount to 99 max
-            String regex = "^[a-zA-Z0-9].{3,63}$";
+            String regex = "^[a-zA-Z0-9 ]{3,63}$";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(nameFld.getText());
             boolean validProduct = matcher.find();
 
             // Regex - Limit purchase amount to 99 max
-            String regex2 = "^[1-9][0-9]+$";
+            String regex2 = "^[1-9][0-9]*$";
             Pattern pattern2 = Pattern.compile(regex2);
             Matcher matcher2 = pattern2.matcher(stockFld.getText());
             boolean validStock = matcher2.find();
 
             // Regex - Limit purchase amount to 99 max
-            String regex3 = "^[1-9][0-9]+([.]\\d{1,2})?$";
+            String regex3 = "^[1-9][0-9]*([.]\\d{1,2})?$";
             Pattern pattern3 = Pattern.compile(regex3);
             Matcher matcher3 = pattern3.matcher(priceFld.getText());
             boolean validPrice = matcher3.find();
@@ -362,13 +362,13 @@ public class MgmtProduct extends javax.swing.JPanel {
                 boolean validProduct = matcher.find();
 
                 // Regex - Limit purchase amount to 99 max
-                String regex2 = "^[1-9][0-9]+$";
+                String regex2 = "^[1-9][0-9]*$";
                 Pattern pattern2 = Pattern.compile(regex2);
                 Matcher matcher2 = pattern2.matcher(stockFld.getText());
                 boolean validStock = matcher2.find();
 
                 // Regex - Limit purchase amount to 99 max
-                String regex3 = "^[1-9][0-9]+([.]\\d{1,2})?$";
+                String regex3 = "^[1-9][0-9]*([.]\\d{1,2})?$";
                 Pattern pattern3 = Pattern.compile(regex3);
                 Matcher matcher3 = pattern3.matcher(priceFld.getText());
                 boolean validPrice = matcher3.find();

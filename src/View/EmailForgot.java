@@ -202,6 +202,7 @@ public class EmailForgot extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
+        otpMap.clear();
         frame.loginNav();
         clearForgotFields();
     }//GEN-LAST:event_backBtnActionPerformed
